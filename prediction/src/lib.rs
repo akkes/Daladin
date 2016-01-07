@@ -2,7 +2,7 @@
 struct Makrov {
     number_of_chains: u32,
     sensibility: f32,
-    //values: Vec<Vec<f32>>
+    values: [[f32; number_of_chains]; number_of_chains]
 }
 impl Makrov {
     ///Creates a new Makrov chain.
