@@ -1,0 +1,6 @@
+[package]
+name = "prediction"
+version = "0.1.0"
+authors = ["uj <sudo.screenlife@gmail.com>"]
+
+[dependencies]
