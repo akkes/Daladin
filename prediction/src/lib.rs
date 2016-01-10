@@ -14,17 +14,21 @@ impl Makrov {
     ///
     /// * `number_of_chains` - Number of chains the Makrov chain will have. Each chain can be a podcast ID.
     /// * `sensibility` - This will afflict how much the probability values will evolve depending on the user feedback.
-    fn new(number_of_chains: u32, sensibility: u32) -> Makrov {
+    fn new(number_of_chains: u32, sensibility: u32, starting_node : usize) -> Makrov {
         Makrov {
             number_of_chains : number_of_chains,
             sensibility : sensibility,
-            values : Makrov::initValues(number_of_chains),
-            actual_node : 0 /*TODO: Discuss if it's a construtor parameter or not.*/
+            values : Makrov::initValues(number_of_chains, starting_node),
+            actual_node : starting_node, /*It is.*/
         }
     }
 
-    fn initValues(number_of_chains: u32) -> Vec<Vec<u32>> {
-        return vec![vec![std::u32::MAX / number_of_chains; number_of_chains as usize]; number_of_chains as usize]
+    fn initValues(number_of_chains: u32, starting_node : usize) -> Vec<Vec<u32>> {
+        let mut ret = vec![vec![std::u32::MAX / number_of_chains; number_of_chains as usize]; number_of_chains as usize];
+        //println!("Reste de la division {:?}", std::u32::MAX % number_of_chains);
+        /*TODO : This should solve le souci du reste, mais ça marche toujours pas. */
+        ret[starting_node][starting_node] += std::u32::MAX % number_of_chains;
+        return ret;
     }
 
     fn printValues(&self) {
@@ -33,9 +37,10 @@ impl Makrov {
 
     fn isValid(&self) -> bool {
         /*TODO: Gérer le fait que avec certains nombres la répartition merde*/
-        //println!("{:?}", std::u32::MAX);
-        //println!("{:?}", self.values[1].iter().fold(0, |sum, val| sum+val));
-        return self.values[1].iter().fold(0, |sum, val| sum+val) == std::u32::MAX
+        println!("u32 MAX : {:?}", std::u32::MAX);
+        println!("Valeurs : {:?}", self.values);
+        println!("Somme valeurs : {:?}", self.values[1].iter().fold(0, |sum, val| sum+val));
+        return self.values[1].iter().fold(0, |sum, val| sum+val) == std::u32::MAX;
     }
     /*fn fillValues(self) {
         self.values = vec![vec![200, 100, 500], vec![200, 200, 600], vec![100, 100, 800]];
@@ -58,19 +63,31 @@ impl Makrov {
             }
         }
         return 1;
-
-
     }
+    /* NE FONCTIONNE PAS. Juste un c/c de la fonction que j'avais fait pour tester*/
+    /*fn apply_feedback(feedback: &String, sensibility : i32, values: &mut Vec<Vec<i32>>, startingNode : usize, endingNode : usize) {
+        //println!("{:?}", feedback as f32 * sensibility);
+        //TODO: Resultats bizarres quand on soustrait.
+        println!("VOici le feedback {:?}", feedback);
+        let signedSensibility =
+            if feedback == "non\n" {
+                sensibility * (-1)
+            } else {
+                sensibility
+            };
+        values[startingNode][endingNode] +=  signedSensibility;
+    }*/
 }
 #[test]
 fn it_works() {
-    let mut mTest = Makrov::new(4, 10);
+    let mut mTest = Makrov::new(4, 10, 0);
     /*mTest.printValues();
     let arr = vec![1, 1, 1, 1, 1];
     let sum = arr.iter().fold(0, |sum, val| sum + val);
     //sum +=
     println!("{:?}", sum);
     //println!("{:?}", hello);*/
+    println!("{:?}", mTest.isValid());
     println!("{:?}", mTest.get_next_node());
     println!("{:?}", mTest.get_next_node());
     println!("{:?}", mTest.get_next_node());
