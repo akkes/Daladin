@@ -34,8 +34,8 @@ impl Makrov {
         /*TODO : This should solve le souci du reste, mais ça marche toujours pas. */
         return ret;
     }
-    fn add_noise(values : &mut Vec<Vec<u32>>, noise: u32) -> Vec<Vec<u32>> {
-        let mut ret = values;
+    fn add_noise(values : &Vec<Vec<u32>>, noise: u32) -> Vec<Vec<u32>> {
+        let mut ret = values.clone();
         let mut rand_y = rand::thread_rng().gen_range(0, values.len());
         let mut rand_x;
         for i in 0..noise {
