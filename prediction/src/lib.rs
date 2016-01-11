@@ -18,33 +18,41 @@ impl Makrov {
         Makrov {
             number_of_chains : number_of_chains,
             sensibility : sensibility,
-            values : Makrov::initValues(number_of_chains, starting_node),
+            values : Makrov::init_values(number_of_chains, starting_node),
             actual_node : starting_node, /*It is.*/
         }
     }
 
-    fn initValues(number_of_chains: u32, starting_node : usize) -> Vec<Vec<u32>> {
+    fn init_values(number_of_chains: u32, starting_node : usize) -> Vec<Vec<u32>> {
+        //println!("INITIALISATION VALEURS A {:?}", std::u32:MAX);
+        println!("Reste a répartir {:?}", std::u32::MAX%number_of_chains);
         let mut ret = vec![vec![std::u32::MAX / number_of_chains; number_of_chains as usize]; number_of_chains as usize];
+        // let mut rand_y = rand::thread_rng().gen_range(0, number_of_chains);
+        // let mut rand_x;
+        //Makrov::add_noise(self, std::u32::MAX%number_of_chains);
         //println!("Reste de la division {:?}", std::u32::MAX % number_of_chains);
         /*TODO : This should solve le souci du reste, mais ça marche toujours pas. */
-        ret[starting_node][starting_node] += std::u32::MAX % number_of_chains;
         return ret;
     }
-
+    fn add_noise(values : &mut Vec<Vec<u32>>, noise: u32) -> Vec<Vec<u32>> {
+        let mut ret = values;
+        let mut rand_y = rand::thread_rng().gen_range(0, values.len());
+        let mut rand_x;
+        for i in 0..noise {
+            //println!("lskdj");
+            rand_x = rand::thread_rng().gen_range(0, values.len());
+            ret[rand_x as usize][rand_y as usize] += 1;
+            //println!("X {} Y {} VALUE {}", rand_x, rand_y, values[rand_x as usize][rand_y as usize]);
+        }
+        return ret;
+    }
     fn printValues(&self) {
         println!("{:?}", self.values);
     }
-
     fn isValid(&self) -> bool {
-        /*TODO: Gérer le fait que avec certains nombres la répartition merde*/
-        println!("u32 MAX : {:?}", std::u32::MAX);
-        println!("Valeurs : {:?}", self.values);
-        println!("Somme valeurs : {:?}", self.values[1].iter().fold(0, |sum, val| sum+val));
-        return self.values[1].iter().fold(0, |sum, val| sum+val) == std::u32::MAX;
+        /*TODO: Rendre la fonction utile. Là on a juste un seuil.*/
+        return self.values[0].iter().fold(0, |sum, val| sum+val) > std::u32::MAX-self.number_of_chains;
     }
-    /*fn fillValues(self) {
-        self.values = vec![vec![200, 100, 500], vec![200, 200, 600], vec![100, 100, 800]];
-    }*/
     fn get_sensibility(&self) -> u32 {
         return self.sensibility
     }
@@ -65,30 +73,35 @@ impl Makrov {
         return 1;
     }
     /* NE FONCTIONNE PAS. Juste un c/c de la fonction que j'avais fait pour tester*/
-    /*fn apply_feedback(feedback: &String, sensibility : i32, values: &mut Vec<Vec<i32>>, startingNode : usize, endingNode : usize) {
+    fn apply_feedback(&mut self, feedback : bool, startingNode : usize) {
         //println!("{:?}", feedback as f32 * sensibility);
         //TODO: Resultats bizarres quand on soustrait.
         println!("VOici le feedback {:?}", feedback);
-        let signedSensibility =
-            if feedback == "non\n" {
-                sensibility * (-1)
-            } else {
-                sensibility
-            };
-        values[startingNode][endingNode] +=  signedSensibility;
-    }*/
+        if feedback == false {
+            self.values[startingNode][self.actual_node] -=  self.sensibility;
+        } else {
+            self.values[startingNode][self.actual_node] +=  self.sensibility;
+        };
+        //self.values[startingNode][self.actual_node] +=  signedSensibility;
+    }
 }
 #[test]
 fn it_works() {
     let mut mTest = Makrov::new(4, 10, 0);
+    println!("{:?}", mTest.isValid());
     /*mTest.printValues();
     let arr = vec![1, 1, 1, 1, 1];
     let sum = arr.iter().fold(0, |sum, val| sum + val);
     //sum +=
     println!("{:?}", sum);
     //println!("{:?}", hello);*/
-    println!("{:?}", mTest.isValid());
+    //println!("{:?}", mTest.isValid());
+
+
+    mTest.printValues();
     println!("{:?}", mTest.get_next_node());
+    mTest.apply_feedback(true, 1);
+    mTest.printValues();
     println!("{:?}", mTest.get_next_node());
     println!("{:?}", mTest.get_next_node());
     println!("{:?}", mTest.get_next_node());
