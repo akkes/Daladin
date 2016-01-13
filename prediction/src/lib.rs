@@ -79,17 +79,27 @@ impl Makrov {
         println!("DBG : Valeur de feedback {:?}", feedback);
         if feedback == false {
             self.values[startingNode][self.actual_node] -=  self.sensibility;
+            for i in 0..self.values[startingNode].len() {
+                if i != self.actual_node {
+                    self.values[startingNode][i] += self.sensibility/self.values[startingNode].len() as u32;
+                }
+            }
         } else {
             self.values[startingNode][self.actual_node] +=  self.sensibility;
+            for i in 0..self.values[startingNode].len() {
+                if i != self.actual_node {
+                    self.values[startingNode][i] -= self.sensibility/self.values[startingNode].len() as u32;
+                }
+            }
         };
         //self.values[startingNode][self.actual_node] +=  signedSensibility;
     }
 }
 #[test]
 fn it_works() {
-    let mut mTest = Makrov::new(4, 10, 0);
+    let mut mTest = Makrov::new(4, 10000, 0);
     println!("{:?}", mTest.printValues());
-    mTest.apply_feedback(false, 2);
+    mTest.apply_feedback(true, 2);
     println!("{:?}", mTest.printValues());
 
 }
