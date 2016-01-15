@@ -25,8 +25,8 @@ impl Makrov {
 
     fn init_values(number_of_chains: u32, starting_node : usize) -> Vec<Vec<u32>> {
         //println!("INITIALISATION VALEURS A {:?}", std::u32:MAX);
-        println!("Reste a répartir {:?}", std::u32::MAX%number_of_chains);
-        let mut ret = vec![vec![std::u32::MAX / number_of_chains; number_of_chains as usize]; number_of_chains as usize];
+        println!("DBG : Reste a répartir en bruit {}", std::u32::MAX%number_of_chains);
+        let mut ret = Makrov::add_noise(&vec![vec![std::u32::MAX / number_of_chains; number_of_chains as usize]; number_of_chains as usize], std::u32::MAX%number_of_chains);
         // let mut rand_y = rand::thread_rng().gen_range(0, number_of_chains);
         // let mut rand_x;
         //Makrov::add_noise(self, std::u32::MAX%number_of_chains);
@@ -35,19 +35,19 @@ impl Makrov {
         return ret;
     }
     fn add_noise(values : &Vec<Vec<u32>>, noise: u32) -> Vec<Vec<u32>> {
+        println!("DBG : Ajout de {} de bruit ", noise);
         let mut ret = values.clone();
         let mut rand_y = rand::thread_rng().gen_range(0, values.len());
-        let mut rand_x;
         for i in 0..noise {
-            //println!("lskdj");
-            rand_x = rand::thread_rng().gen_range(0, values.len());
-            ret[rand_x as usize][rand_y as usize] += 1;
+            rand_y = rand::thread_rng().gen_range(0, values.len());
+            ret[i as usize%values.len() as usize][rand_y as usize] += 1;
+            println!("DBG : Valeur de bruit {} ajoutée en {} {}", i, i as usize%values.len(), rand_y);
             //println!("X {} Y {} VALUE {}", rand_x, rand_y, values[rand_x as usize][rand_y as usize]);
         }
         return ret;
     }
     fn printValues(&self) {
-        println!("{:?}", self.values);
+        println!("DBG : Contenu de self.values {:?}", self.values);
     }
     fn isValid(&self) -> bool {
         /*TODO: Rendre la fonction utile. Là on a juste un seuil.*/
@@ -76,36 +76,30 @@ impl Makrov {
     fn apply_feedback(&mut self, feedback : bool, startingNode : usize) {
         //println!("{:?}", feedback as f32 * sensibility);
         //TODO: Resultats bizarres quand on soustrait.
-        println!("VOici le feedback {:?}", feedback);
+        println!("DBG : Valeur de feedback {:?}", feedback);
         if feedback == false {
             self.values[startingNode][self.actual_node] -=  self.sensibility;
+            for i in 0..self.values[startingNode].len() {
+                if i != self.actual_node {
+                    self.values[startingNode][i] += self.sensibility/self.values[startingNode].len() as u32;
+                }
+            }
         } else {
             self.values[startingNode][self.actual_node] +=  self.sensibility;
+            for i in 0..self.values[startingNode].len() {
+                if i != self.actual_node {
+                    self.values[startingNode][i] -= self.sensibility/self.values[startingNode].len() as u32;
+                }
+            }
         };
         //self.values[startingNode][self.actual_node] +=  signedSensibility;
     }
 }
 #[test]
 fn it_works() {
-    let mut mTest = Makrov::new(4, 10, 0);
-    println!("{:?}", mTest.isValid());
-    /*mTest.printValues();
-    let arr = vec![1, 1, 1, 1, 1];
-    let sum = arr.iter().fold(0, |sum, val| sum + val);
-    //sum +=
-    println!("{:?}", sum);
-    //println!("{:?}", hello);*/
-    //println!("{:?}", mTest.isValid());
+    let mut mTest = Makrov::new(4, 10000, 0);
+    println!("{:?}", mTest.printValues());
+    mTest.apply_feedback(true, 2);
+    println!("{:?}", mTest.printValues());
 
-
-    mTest.printValues();
-    println!("{:?}", mTest.get_next_node());
-    mTest.apply_feedback(true, 1);
-    mTest.printValues();
-    println!("{:?}", mTest.get_next_node());
-    println!("{:?}", mTest.get_next_node());
-    println!("{:?}", mTest.get_next_node());
-    println!("{:?}", mTest.get_next_node());
-    println!("{:?}", mTest.get_next_node());
-    println!("{:?}", mTest.get_next_node());
 }
