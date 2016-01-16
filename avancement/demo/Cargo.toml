@@ -1,0 +1,9 @@
+[package]
+name = "demo"
+version = "0.1.0"
+authors = ["uj <sudo.screenlife@gmail.com>"]
+
+[dependencies]
+
+rand = "0.3.0"
+rustbox = "*"
