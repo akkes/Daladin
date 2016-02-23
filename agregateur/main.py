@@ -25,14 +25,19 @@ def isAPodcastFeed(url):
 def findPodcast(url):
     r = requests.get(url)
     soup = BeautifulSoup.BeautifulSoup(r.text, "lxml")
+    print "origin url: " + url
+    if isAPodcastFeed(soup.text):
+        return url
 
     # search in header
+    print len(soup.findAll('link'))
     for link in soup.findAll('link'):
         if link.has_attr('type') and link['type'] == "application/rss+xml":
             if isAPodcastFeed(link['href']):
                 return link['href']
 
     # this webpage sucks, we need to search in links
+    print len(soup.findAll('a'))
     for a in soup.findAll('a'):
         if a.has_attr('href'):
             if isAPodcastFeed(a['href']):
