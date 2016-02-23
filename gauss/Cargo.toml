@@ -1,0 +1,8 @@
+[package]
+name = "gauss"
+version = "0.1.0"
+authors = ["uj <aulien.jbadji@gmail.com>"]
+
+[dependencies]
+
+time = "0.1.*"
