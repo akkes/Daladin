@@ -11,7 +11,9 @@ fn gauss(hour : f64, p : f64, normal_hour : f64, duration : f32) -> f64{
     let egblog = a*(top_exp/bot_exp).exp();
     return egblog;
 }
-
+fn get_actual_time() {
+    println!("{:?}", time::get_time());
+}
 #[test]
 fn it_works() {
 }
@@ -21,5 +23,9 @@ fn main() {
 
     //println!("{:?}", tm);
     println!("Hello, world!");
+    let initial_time = time::strptime("0-08-00-00", "%w-%H-%M-%S").unwrap();
+    let initial_time2  = time::strptime("0-08-10-00", "%w-%H-%M-%S").unwrap();
+    println!("{:?}", initial_time2-initial_time);
+
     println!("{}", gauss(7.85, 0.6, 8.0, 1.5));
 }
