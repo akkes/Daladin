@@ -2,6 +2,9 @@ import requests
 import bs4 as BeautifulSoup
 import feedparser
 import re
+import constants
+
+feedparser.USER_AGENT = constants.USER_AGENT
 
 
 def isAPodcastFeed(url):
@@ -24,7 +27,8 @@ def isAPodcastFeed(url):
 
 
 def findPodcast(url):
-    r = requests.get(url)
+    headers = {'user-agent': constants.USER_AGENT}
+    r = requests.get(url, headers=headers)
     print "origin url: " + url
     soup = BeautifulSoup.BeautifulSoup(r.text, "lxml")
 
