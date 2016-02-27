@@ -1,3 +1,6 @@
+# Daladin secret files
+agregateur/daladin_spotify.key
+
 # Compiled files
 *.o
 *.so
