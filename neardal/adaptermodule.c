@@ -13,9 +13,6 @@ Adapter_init(void)
     neardal_adapter	*adapter;
     static int	     power = 1;
 
-    (void) argc; /* Remove warning */
-    (void) argv; /* Remove warning */
-
     /* Look for available adapter */
     ec = neardal_get_adapters(&adpArray, &adpLen);
     if (ec == NEARDAL_SUCCESS)
@@ -52,7 +49,7 @@ Adapter_init(void)
 
     neardal_set_cb_adapter_added(call_adapter_added, NULL);
     neardal_set_cb_adapter_removed(call_adapter_removed, NULL);
-    neardal_set_cb_adapter_property_changed(call_adapter_prop_changed, NULL);
+    neardal_set_cb_adapter_property_changed(call_adapter_property_changed, NULL);
     ec = neardal_set_cb_tag_found(call_tag_found, NULL);
     if (ec != NEARDAL_SUCCESS)
     {
@@ -63,7 +60,8 @@ Adapter_init(void)
     neardal_set_cb_record_found(call_record_found, NULL);
 }
 
-static PyObject* launch(PyObject* self, PyObject* args) {
+static PyObject* launch(Adapter* self, PyObject* args) {
+    PyObject *result = NULL;
     errorCode_t	ec;
     /* Start Discovery Loop*/
 	ec = neardal_start_poll(adpName);
@@ -78,7 +76,7 @@ static PyObject* launch(PyObject* self, PyObject* args) {
 		g_main_loop_run(gMain_loop);
 		g_main_loop_unref(gMain_loop);
 	} else
-		return 1;
+		//return 1;
 
     Py_INCREF(Py_None);
     result = Py_None;
@@ -107,7 +105,7 @@ say_hello(PyObject* self, PyObject* args)
 
 // signals for action
 static PyObject* callback_adapter_added = NULL;
-static PyObject* add_callback_adapter_added(PyObject* self, PyObject* args) {
+static PyObject* add_callback_adapter_added(Adapter* self, PyObject* args) {
     PyObject *result = NULL;
     PyObject *temp;
 
@@ -132,7 +130,7 @@ static void call_adapter_added(const char* tagName, void* data) {
 
 // signals for action
 static PyObject* callback_adapter_removed = NULL;
-static PyObject* add_callback_adapter_removed(PyObject* self, PyObject* args) {
+static PyObject* add_callback_adapter_removed(Adapter* self, PyObject* args) {
     PyObject* result = NULL;
     PyObject* temp;
 
@@ -157,7 +155,7 @@ static void call_adapter_removed(const char* tagName, void* data) {
 
 // signals for action
 static PyObject* callback_adapter_property_changed = NULL;
-static PyObject* add_callback_adapter_property_changed(PyObject* self, PyObject* args) {
+static PyObject* add_callback_adapter_property_changed(Adapter* self, PyObject* args) {
     PyObject *result = NULL;
     PyObject *temp;
 
@@ -182,7 +180,7 @@ static void call_adapter_property_changed(const char* tagName, void* data) {
 
 // signals for action
 static PyObject* callback_tag_found = NULL;
-static PyObject* add_callback_tag_found(PyObject* self, PyObject* args) {
+static PyObject* add_callback_tag_found(Adapter* self, PyObject* args) {
     PyObject *result = NULL;
     PyObject *temp;
 
@@ -207,7 +205,7 @@ static void call_tag_found(const char* tagName, void* data) {
 
 // signals for action
 static PyObject* callback_tag_lost = NULL;
-static PyObject* add_callback_tag_lost(PyObject* self, PyObject* args) {
+static PyObject* add_callback_tag_lost(Adapter* self, PyObject* args) {
     PyObject *result = NULL;
     PyObject *temp;
 
@@ -232,7 +230,7 @@ static void call_tag_lost(const char* tagName, void* data) {
 
 // signals for action
 static PyObject* callback_record_found = NULL;
-static PyObject* add_callback_record_found(PyObject* self, PyObject* args) {
+static PyObject* add_callback_record_found(Adapter* self, PyObject* args) {
     PyObject *result = NULL;
     PyObject *temp;
 
@@ -262,6 +260,7 @@ static void call_record_found(const char* tagName, void* data) {
 static PyMethodDef AdapterMethods[] =
 {
     {"say_hello", say_hello, METH_VARARGS, "Greet somebody."},
+    {"launch", launch, METH_VARARGS, "launch adapter interaction"},
     {"add_callback_adapter_added", add_callback_adapter_added, METH_VARARGS, "add callback for action"},
     {"add_callback_adapter_removed", add_callback_adapter_removed, METH_VARARGS, "add callback for action"},
     {"add_callback_adapter_property_changed", add_callback_adapter_property_changed, METH_VARARGS, "add callback for action"},
