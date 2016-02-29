@@ -6,8 +6,6 @@ char             adpName[30];
 int
 Adapter_init(void)
 {
-    (void) Py_InitModule("ndef", ndefMethods);
-
     errorCode_t	ec;
     char           **adpArray = NULL;
     int              adpLen;
@@ -52,17 +50,17 @@ Adapter_init(void)
         return 1;
     }
 
-    neardal_set_cb_adapter_added(callback_adapter_added, NULL);
-    neardal_set_cb_adapter_removed(callback_adapter_removed, NULL);
-    neardal_set_cb_adapter_property_changed(callback_adapter_prop_changed, NULL);
-    ec = neardal_set_cb_tag_found(callback_tag_found, NULL);
+    neardal_set_cb_adapter_added(call_adapter_added, NULL);
+    neardal_set_cb_adapter_removed(call_adapter_removed, NULL);
+    neardal_set_cb_adapter_property_changed(call_adapter_prop_changed, NULL);
+    ec = neardal_set_cb_tag_found(call_tag_found, NULL);
     if (ec != NEARDAL_SUCCESS)
     {
         printf("Error registering Tag found callback\n");
         return 1;
     }
-    neardal_set_cb_tag_lost(callback_tag_lost, NULL);
-    neardal_set_cb_record_found(callback_record_found, NULL);
+    neardal_set_cb_tag_lost(call_tag_lost, NULL);
+    neardal_set_cb_record_found(call_record_found, NULL);
 }
 
 static PyObject* launch(PyObject* self, PyObject* args) {

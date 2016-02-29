@@ -1,18 +1,18 @@
 from distutils.core import setup, Extension
 
-moduleNDEF = Extension('ndef',
-                       define_macros=[('MAJOR_VERSION', '1'),
-                                      ('MINOR_VERSION', '0')],
-                       include_dirs=['/usr/local/include',
-                                     '/usr/include/glib-2.0',
-                                     '/usr/lib/arm-linux-gnueabihf/glib-2.0/include',
-                                     '/usr/local/include/neardal'],
-                       libraries=['neardal', 'glib'],
-                       library_dirs=['/usr/local/lib'],
-                       sources=['ndefmodule.c'])
+module_neardal = Extension('neardal',
+                           define_macros=[('MAJOR_VERSION', '1'),
+                                          ('MINOR_VERSION', '0')],
+                           include_dirs=['/usr/local/include',
+                                         '/usr/include/glib-2.0',
+                                         '/usr/lib/arm-linux-gnueabihf/glib-2.0/include',
+                                         '/usr/local/include/neardal'],
+                           libraries=['neardal', 'glib'],
+                           library_dirs=['/usr/local/lib'],
+                           sources=['adaptermodule.c', 'neardal.c'])
 
 setup(name='NeardalPy',
-      version='1.0',
+      version='0.1',
       description='libneardal binding for python',
       author='Louis Desportes',
       author_email='louis@akkes.fr',
@@ -21,4 +21,4 @@ setup(name='NeardalPy',
 A libneardal binding for python.
 Allow read/write of NFC NDEF and cards
 ''',
-      ext_modules=[moduleNDEF])
+      ext_modules=[module_neardal])
