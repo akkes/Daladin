@@ -1,4 +1,4 @@
-#include "ndefmodule.h"
+#include "adaptermodule.h"
 
 GMainLoop	    *gMain_loop = NULL;
 char             adpName[30];

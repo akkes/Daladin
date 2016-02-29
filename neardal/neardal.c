@@ -1,4 +1,4 @@
-#include "adapter.h"
+#include "adaptermodule.h"
 
 PyMethodDef nxppy_methods[] = {
   {NULL, NULL},
