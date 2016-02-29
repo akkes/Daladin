@@ -3,8 +3,11 @@ from distutils.core import setup, Extension
 moduleNDEF = Extension('ndef',
                        define_macros=[('MAJOR_VERSION', '1'),
                                       ('MINOR_VERSION', '0')],
-                       include_dirs=['/usr/local/include'],
-                       libraries=['neardal'],
+                       include_dirs=['/usr/local/include',
+                                     '/usr/include/glib-2.0',
+                                     '/usr/lib/arm-linux-gnueabihf/glib-2.0/include',
+                                     '/usr/local/include/neardal'],
+                       libraries=['neardal', 'glib'],
                        library_dirs=['/usr/local/lib'],
                        sources=['ndefmodule.c'])
 
