@@ -1,13 +1,13 @@
 extern crate rand;
 
 use self::rand::Rng;
-use ::std::u32::MAX;
+use std::cmp::PartialOrd;
 ///Represents a Makrov chain.
 pub struct Makrov {
     number_of_chains: u32,
     sensibility: u32,
-    values: Vec<Vec<u32>>,
-    actual_node : usize,
+    values: Vec<Vec<f64>>,
+    actual_node : usize, //Is it useful ?
 }
 impl Makrov {
     ///Creates a new Makrov chain.
@@ -24,10 +24,10 @@ impl Makrov {
         }
     }
 
-    fn init_values(number_of_chains: u32, starting_node : usize) -> Vec<Vec<u32>> {
+    fn init_values(number_of_chains: u32, starting_node : usize) -> Vec<Vec<f64>> {
         //println!("INITIALISATION VALEURS A {:?}", std::u32:MAX);
-        println!("DBG : Reste a répartir en bruit {}", MAX%number_of_chains);
-        let mut ret = Makrov::add_noise(&vec![vec![MAX / number_of_chains; number_of_chains as usize]; number_of_chains as usize], MAX%number_of_chains);
+        //println!("DBG : Reste a répartir en bruit {}", 1.0f64%number_of_chains);
+        let mut ret = vec![vec![1.0f64/number_of_chains as f64; number_of_chains as usize]; number_of_chains as usize];
         // let mut rand_y = rand::thread_rng().gen_range(0, number_of_chains);
         // let mut rand_x;
         //Makrov::add_noise(self, MAX%number_of_chains);
@@ -35,7 +35,7 @@ impl Makrov {
         /*TODO : This should solve le souci du reste, mais ça marche toujours pas. */
         return ret;
     }
-    fn add_noise(values : &Vec<Vec<u32>>, noise: u32) -> Vec<Vec<u32>> {
+    /*fn add_noise(values : &Vec<Vec<u32>>, noise: u32) -> Vec<Vec<u32>> {
         println!("DBG : Ajout de {} de bruit ", noise);
         let mut ret = values.clone();
         let mut rand_y = rand::thread_rng().gen_range(0, values.len());
@@ -46,16 +46,20 @@ impl Makrov {
             //println!("X {} Y {} VALUE {}", rand_x, rand_y, values[rand_x as usize][rand_y as usize]);
         }
         return ret;
-    }
+    }*/
     pub fn printValues(&self) {
         println!("DBG : Contenu de self.values {:?}", self.values);
     }
-    pub fn getValues(&self) -> Vec<Vec<u32>> {
+    pub fn getValues(&self) -> Vec<Vec<f64>> {
         self.values.clone()
     }
-    fn isValid(&self) -> bool {
+    /*fn isValid(&self) -> bool {
         /*TODO: Rendre la fonction utile. Là on a juste un seuil.*/
         return self.values[0].iter().fold(0, |sum, val| sum+val) > MAX-self.number_of_chains;
+    }*/
+    pub fn sum(&self, line : usize) -> f64 {
+        let ret = self.values[line].iter().fold(0f64, |sum, val| sum + val) as f64;
+        return ret;
     }
     pub fn get_sensibility(&self) -> u32 {
         self.sensibility
@@ -67,7 +71,7 @@ impl Makrov {
         self.number_of_chains
     }
     pub fn get_next_node(&mut self) -> usize {
-        let mut random = rand::thread_rng().gen_range(0u32, MAX);
+        let mut random = rand::thread_rng().gen_range(0f64, 1f64);
         //println!("{:?}", random);
         /*TODO: Faire moins sale ave des filter() et fold()*/
         for i in 0..self.values.len() {
@@ -81,8 +85,23 @@ impl Makrov {
         }
         return 1;
     }
+    pub fn set_value(&mut self, from : usize, to: usize, value : f64) {
+        //TODO: Chack if float isn't 0<float<1
+        /*match value.partial_cmp(1f64) {
+            Ordering::Less => value = 1f64,
+
+        };*/
+        let delta = self.values[from][to] - value;
+        for i in 0..self.values.len() {
+            if i==to {
+                self.values[from][to] = value;
+            } else {
+                self.values[from][i] += delta/(self.number_of_chains-1) as f64;
+            }
+        }
+    }
     /* NE FONCTIONNE PAS. Juste un c/c de la fonction que j'avais fait pour tester*/
-    pub fn apply_feedback(&mut self, feedback : bool, startingNode : usize) {
+    /*pub fn apply_feedback(&mut self, feedback : bool, startingNode : usize) {
         //println!("{:?}", feedback as f32 * sensibility);
         //TODO: Resultats bizarres quand on soustrait.
         //TODO: FIX OVERFLOWS
@@ -103,13 +122,16 @@ impl Makrov {
             }
         };
         //self.values[startingNode][self.actual_node] +=  signedSensibility;
-    }
+    }*/
 }
 #[test]
 fn it_works() {
     let mut mTest = Makrov::new(4, 10000, 0);
     println!("{:?}", mTest.printValues());
-    mTest.apply_feedback(true, 2);
+    println!("{:?}", mTest.sum(0));
+    mTest.set_value(0, 3, 1.1);
     println!("{:?}", mTest.printValues());
+    println!("{:?}", mTest.sum(0));
+
 
 }
