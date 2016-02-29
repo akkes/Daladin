@@ -13,14 +13,14 @@ say_hello(PyObject* self, PyObject* args)
     Py_RETURN_NONE;
 }
 
-static PyMethodDef ndef14Methods[] =
+static PyMethodDef ndefMethods[] =
 {
      {"say_hello", say_hello, METH_VARARGS, "Greet somebody."},
      {NULL, NULL, 0, NULL}
 };
 
 PyMODINIT_FUNC
-inithello(void)
+initndef(void)
 {
-     (void) Py_InitModule("hello", HelloMethods);
+     (void) Py_InitModule("ndef", ndefMethods);
 }

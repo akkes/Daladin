@@ -6,10 +6,10 @@ moduleNDEF = Extension('ndef',
                        include_dirs=['/usr/local/include'],
                        libraries=['neardal'],
                        library_dirs=['/usr/local/lib'],
-                       sources=['neardal.c'])
+                       sources=['ndefmodule.c'])
 
 setup(name='NeardalPy',
-      version '1.0',
+      version='1.0',
       description='libneardal binding for python',
       author='Louis Desportes',
       author_email='louis@akkes.fr',
