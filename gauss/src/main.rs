@@ -12,15 +12,7 @@ fn gauss(hour : f64, p : f64, normal_hour : f64, duration : f32) -> f64{
     return egblog;
 }
 
-fn gaussTm(hour : time::Tm, p : f64, normal_hour : time::Tm, duration : time::Duration) -> f64{
-    //tada
-    //A tweak, marche chelou pour les contenus courts
-    let a = p;
-    let top_exp = -((normal_hour-hour).num_seconds() as f64).powi(2);
-    let bot_exp = 2f64 * (duration.num_seconds() as f64/4f64).powi(2);
-    let egblog = a*(top_exp/bot_exp).exp();
-    return egblog;
-}
+
 
 fn get_actual_time() {
     println!("{:?}", time::get_time());
