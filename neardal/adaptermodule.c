@@ -84,6 +84,8 @@ static PyObject* launch(Adapter* self, PyObject* args) {
 
     Py_INCREF(Py_None);
     result = Py_None;
+
+    return result;
 }
 
 static PyObject*
