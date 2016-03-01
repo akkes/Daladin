@@ -263,7 +263,7 @@ static void call_record_found(const char* tagName, void* data) {
  * Python definitions *
  **********************/
 
-static PyMethodDef AdapterMethods[] =
+PyMethodDef AdapterMethods[] =
 {
     {"say_hello", say_hello, METH_VARARGS, "Greet somebody."},
     {"launch", launch, METH_VARARGS, "launch adapter interaction"},

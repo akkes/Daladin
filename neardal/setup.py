@@ -7,7 +7,7 @@ module_neardal = Extension('neardal',
                                          '/usr/include/glib-2.0',
                                          '/usr/lib/arm-linux-gnueabihf/glib-2.0/include',
                                          '/usr/local/include/neardal'],
-                           libraries=['neardal', 'glib'],
+                           libraries=['neardal', 'glib-2.0'],
                            library_dirs=['/usr/local/lib'],
                            sources=['adaptermodule.c', 'neardal.c'])
 
