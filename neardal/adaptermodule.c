@@ -58,6 +58,8 @@ Adapter_init(void)
     }
     neardal_set_cb_tag_lost(call_tag_lost, NULL);
     neardal_set_cb_record_found(call_record_found, NULL);
+
+    return 0;
 }
 
 static PyObject* launch(Adapter* self, PyObject* args) {
@@ -68,7 +70,8 @@ static PyObject* launch(Adapter* self, PyObject* args) {
 	if (ec != NEARDAL_SUCCESS && ec != NEARDAL_ERROR_POLLING_ALREADY_ACTIVE)
 	{
 		printf("Error starting discovery loop\n");
-		return 1;
+		//return 1;
+        return NULL;
 	}
 
 	gMain_loop = g_main_loop_new(NULL, FALSE);
@@ -76,6 +79,7 @@ static PyObject* launch(Adapter* self, PyObject* args) {
 		g_main_loop_run(gMain_loop);
 		g_main_loop_unref(gMain_loop);
 	} else
+        return NULL;
 		//return 1;
 
     Py_INCREF(Py_None);
@@ -174,7 +178,7 @@ static PyObject* add_callback_adapter_property_changed(Adapter* self, PyObject* 
     return result;
 }
 
-static void call_adapter_property_changed(const char* tagName, void* data) {
+static void call_adapter_property_changed(char *adpName, char *propName, void *value, void *user_data) {
     puts("call_adapter_property_changed");
 }
 
