@@ -89,6 +89,17 @@ PyObject* launch(Adapter* self, PyObject* args) {
     return result;
 }
 
+PyObject* stop(Adapter* self, PyObject* args) {
+    PyObject *result = NULL;
+
+    g_main_loop_quit(gMain_loop);
+
+    Py_INCREF(Py_None);
+    result = Py_None;
+
+    return result;
+}
+
 static PyObject*
 say_hello(PyObject* self, PyObject* args)
 {
@@ -268,6 +279,7 @@ PyMethodDef AdapterMethods[] =
 {
     {"say_hello", (PyCFunction)say_hello, METH_VARARGS, "Greet somebody."},
     {"launch", (PyCFunction)launch, METH_VARARGS, "launch adapter interaction"},
+    {"stop", (PyCFunction)stop, METH_VARARGS, "stop adapter interaction"},
     {"add_callback_adapter_added", (PyCFunction)add_callback_adapter_added, METH_VARARGS, "add callback for action"},
     {"add_callback_adapter_removed", (PyCFunction)add_callback_adapter_removed, METH_VARARGS, "add callback for action"},
     {"add_callback_adapter_property_changed", (PyCFunction)add_callback_adapter_property_changed, METH_VARARGS, "add callback for action"},
