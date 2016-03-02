@@ -9,7 +9,6 @@ Adapter_init(Adapter *self, PyObject *args, PyObject *kwds)
     errorCode_t	ec;
     char           **adpArray = NULL;
     int              adpLen;
-    char             adpName[30];
     neardal_adapter	*adapter;
     static int	     power = 1;
 
@@ -17,7 +16,7 @@ Adapter_init(Adapter *self, PyObject *args, PyObject *kwds)
     ec = neardal_get_adapters(&adpArray, &adpLen);
     if (ec == NEARDAL_SUCCESS) {
         printf(".. Adapter found at '%s'\n", adpArray[0]);
-        memcpy(adpName, adpArray[0], sizeof(adpName));
+        memcpy(self->adpName, adpArray[0], sizeof(self->adpName));
         neardal_free_array(&adpArray);
     } else {
         printf("No adapter found (%s)\n", neardal_error_get_text(ec));
@@ -25,13 +24,13 @@ Adapter_init(Adapter *self, PyObject *args, PyObject *kwds)
     }
 
     /* Power on first adapter found */
-    ec = neardal_get_adapter_properties(adpName,&adapter);
+    ec = neardal_get_adapter_properties(self->adpName,&adapter);
     if (ec == NEARDAL_SUCCESS) {
         power=adapter->powered;
         neardal_free_adapter(adapter);
         if (!power) {
             power = 1;
-            ec = neardal_set_adapter_property(adpName, NEARD_ADP_PROP_POWERED, GINT_TO_POINTER(power));
+            ec = neardal_set_adapter_property(self->adpName, NEARD_ADP_PROP_POWERED, GINT_TO_POINTER(power));
             if (ec != NEARDAL_SUCCESS) {
                 printf("Error setting adapter properties\n");
                 return 1;
@@ -56,14 +55,16 @@ Adapter_init(Adapter *self, PyObject *args, PyObject *kwds)
     return 0;
 }
 
-void* loop(void* arg) {
-    Adapter adapter = (Adapter)arg;
+void* adapter_loop(void* arg) {
+    errorCode_t	ec;
+    Adapter* self = (Adapter*)arg;
     /* Start Discovery Loop*/
-	ec = neardal_start_poll(adapter.name);
+	printf("%s\n", self->adpName);
+	ec = neardal_start_poll(self->adpName);
 	if (ec != NEARDAL_SUCCESS && ec != NEARDAL_ERROR_POLLING_ALREADY_ACTIVE)
 	{
 		printf("Error starting discovery loop\n");
-		return 1;
+		return (void*)1;
 	}
 
 	gMain_loop = g_main_loop_new(NULL, FALSE);
@@ -71,15 +72,15 @@ void* loop(void* arg) {
 		g_main_loop_run(gMain_loop);
 		g_main_loop_unref(gMain_loop);
 	} else
-		return 1;
+		return (void*)1;
 
-	return 0;
+	return (void*)0;
 }
 
 PyObject* launch(Adapter* self, PyObject* args) {
     PyObject *result = NULL;
 
-    pthread_create(self.adapter_thread, 0, loop, self.adapter)
+    pthread_create(&self->adapter_thread, 0, adapter_loop, self);
 
     Py_INCREF(Py_None);
     result = Py_None;

@@ -11,7 +11,8 @@
 typedef struct {
     PyObject_HEAD
     neardal_adapter adapter;
-    pthread         adapter_thread;
+    char 		adpName[30];
+    pthread_t         adapter_thread;
     pthread_cond_t  stop_condition;
 } Adapter;
 
