@@ -5,11 +5,14 @@
 #include <unistd.h>
 
 #include <glib.h>
+#include <pthread.h>
 #include <neardal.h>
 
 typedef struct {
     PyObject_HEAD
     neardal_adapter adapter;
+    pthread         adapter_thread;
+    pthread_cond_t  stop_condition;
 } Adapter;
 
 int adapter_init(Adapter *self, PyObject *args, PyObject *kwds);
