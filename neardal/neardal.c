@@ -1,6 +1,7 @@
+#include <Python.h>
 #include "adaptermodule.h"
 
-PyMethodDef nxppy_methods[] = {
+PyMethodDef neardal_methods[] = {
   {NULL, NULL},
 };
 
@@ -8,7 +9,17 @@ void initneardal() {
     puts("initneardal");
     PyObject *module;
 
-    module = Py_InitModule("neardal", AdapterMethods);
+    AdapterType.tp_new = PyType_GenericNew;
+    if (PyType_Ready(&AdapterType) < 0) {
+        return;
+    }
+
+    module = Py_InitModule("neardal", neardal_methods);
+
+    if (module == NULL) {
+        puts("init error");
+        return;
+    }
 
     Py_INCREF(&AdapterType);
     PyModule_AddObject(module, "Adapter", (PyObject *)&AdapterType);

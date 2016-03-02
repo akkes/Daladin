@@ -266,14 +266,14 @@ void call_record_found(const char* tagName, void* data) {
 
 PyMethodDef AdapterMethods[] =
 {
-    {"say_hello", say_hello, METH_VARARGS, "Greet somebody."},
-    {"launch", launch, METH_VARARGS, "launch adapter interaction"},
-    {"add_callback_adapter_added", add_callback_adapter_added, METH_VARARGS, "add callback for action"},
-    {"add_callback_adapter_removed", add_callback_adapter_removed, METH_VARARGS, "add callback for action"},
-    {"add_callback_adapter_property_changed", add_callback_adapter_property_changed, METH_VARARGS, "add callback for action"},
-    {"add_callback_tag_found", add_callback_tag_found, METH_VARARGS, "add callback for action"},
-    {"add_callback_tag_lost", add_callback_tag_lost, METH_VARARGS, "add callback for action"},
-    {"add_callback_record_found", add_callback_record_found, METH_VARARGS, "add callback for action"},
+    {"say_hello", (PyCFunction)say_hello, METH_VARARGS, "Greet somebody."},
+    {"launch", (PyCFunction)launch, METH_VARARGS, "launch adapter interaction"},
+    {"add_callback_adapter_added", (PyCFunction)add_callback_adapter_added, METH_VARARGS, "add callback for action"},
+    {"add_callback_adapter_removed", (PyCFunction)add_callback_adapter_removed, METH_VARARGS, "add callback for action"},
+    {"add_callback_adapter_property_changed", (PyCFunction)add_callback_adapter_property_changed, METH_VARARGS, "add callback for action"},
+    {"add_callback_tag_found", (PyCFunction)add_callback_tag_found, METH_VARARGS, "add callback for action"},
+    {"add_callback_tag_lost", (PyCFunction)add_callback_tag_lost, METH_VARARGS, "add callback for action"},
+    {"add_callback_record_found", (PyCFunction)add_callback_record_found, METH_VARARGS, "add callback for action"},
     {NULL, NULL, 0, NULL}
 };
 
