@@ -17,7 +17,7 @@ class SpotifyPlayer(object):
             spotify.SessionEvent.CONNECTION_STATE_UPDATED,
             connection_state_listener)
         audio = spotify.AlsaSink(self.session)
-        self.session.login('akkes', '3rtymoze!')
+        self.session.login('alice', 's3cr3tp4ssw0rd')
         logged_in_event = threading.Event()
 
     def connection_state_listener(session):

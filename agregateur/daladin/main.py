@@ -7,7 +7,9 @@ def main():
         print "Error: no url given"
         return 1
 
-    print selectParser(sys.argv[1])
+    player = selectParser(sys.argv[1])
+    player.load()
+    player.play()
 
 if __name__ == '__main__':
     main()
