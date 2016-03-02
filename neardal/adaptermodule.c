@@ -4,8 +4,9 @@ GMainLoop	    *gMain_loop = NULL;
 char             adpName[30];
 
 int
-Adapter_init(void)
+Adapter_init(Adapter *self, PyObject *args, PyObject *kwds)
 {
+    puts("Adapter_init");
     errorCode_t	ec;
     char           **adpArray = NULL;
     int              adpLen;
@@ -62,7 +63,7 @@ Adapter_init(void)
     return 0;
 }
 
-static PyObject* launch(Adapter* self, PyObject* args) {
+PyObject* launch(Adapter* self, PyObject* args) {
     PyObject *result = NULL;
     errorCode_t	ec;
     /* Start Discovery Loop*/
@@ -111,7 +112,7 @@ say_hello(PyObject* self, PyObject* args)
 
 // signals for action
 static PyObject* callback_adapter_added = NULL;
-static PyObject* add_callback_adapter_added(Adapter* self, PyObject* args) {
+PyObject* add_callback_adapter_added(Adapter* self, PyObject* args) {
     PyObject *result = NULL;
     PyObject *temp;
 
@@ -130,13 +131,13 @@ static PyObject* add_callback_adapter_added(Adapter* self, PyObject* args) {
     return result;
 }
 
-static void call_adapter_added(const char* tagName, void* data) {
+void call_adapter_added(const char* tagName, void* data) {
     puts("call_adapter_added");
 }
 
 // signals for action
 static PyObject* callback_adapter_removed = NULL;
-static PyObject* add_callback_adapter_removed(Adapter* self, PyObject* args) {
+PyObject* add_callback_adapter_removed(Adapter* self, PyObject* args) {
     PyObject* result = NULL;
     PyObject* temp;
 
@@ -155,13 +156,13 @@ static PyObject* add_callback_adapter_removed(Adapter* self, PyObject* args) {
     return result;
 }
 
-static void call_adapter_removed(const char* tagName, void* data) {
+void call_adapter_removed(const char* tagName, void* data) {
     puts("call_adapter_removed");
 }
 
 // signals for action
 static PyObject* callback_adapter_property_changed = NULL;
-static PyObject* add_callback_adapter_property_changed(Adapter* self, PyObject* args) {
+PyObject* add_callback_adapter_property_changed(Adapter* self, PyObject* args) {
     PyObject *result = NULL;
     PyObject *temp;
 
@@ -180,13 +181,13 @@ static PyObject* add_callback_adapter_property_changed(Adapter* self, PyObject* 
     return result;
 }
 
-static void call_adapter_property_changed(char *adpName, char *propName, void *value, void *user_data) {
+void call_adapter_property_changed(char *adpName, char *propName, void *value, void *user_data) {
     puts("call_adapter_property_changed");
 }
 
 // signals for action
 static PyObject* callback_tag_found = NULL;
-static PyObject* add_callback_tag_found(Adapter* self, PyObject* args) {
+PyObject* add_callback_tag_found(Adapter* self, PyObject* args) {
     PyObject *result = NULL;
     PyObject *temp;
 
@@ -205,13 +206,13 @@ static PyObject* add_callback_tag_found(Adapter* self, PyObject* args) {
     return result;
 }
 
-static void call_tag_found(const char* tagName, void* data) {
+void call_tag_found(const char* tagName, void* data) {
     puts("call_tag_found");
 }
 
 // signals for action
 static PyObject* callback_tag_lost = NULL;
-static PyObject* add_callback_tag_lost(Adapter* self, PyObject* args) {
+PyObject* add_callback_tag_lost(Adapter* self, PyObject* args) {
     PyObject *result = NULL;
     PyObject *temp;
 
@@ -230,13 +231,13 @@ static PyObject* add_callback_tag_lost(Adapter* self, PyObject* args) {
     return result;
 }
 
-static void call_tag_lost(const char* tagName, void* data) {
+void call_tag_lost(const char* tagName, void* data) {
     puts("call_tag_lost");
 }
 
 // signals for action
 static PyObject* callback_record_found = NULL;
-static PyObject* add_callback_record_found(Adapter* self, PyObject* args) {
+PyObject* add_callback_record_found(Adapter* self, PyObject* args) {
     PyObject *result = NULL;
     PyObject *temp;
 
@@ -255,7 +256,7 @@ static PyObject* add_callback_record_found(Adapter* self, PyObject* args) {
     return result;
 }
 
-static void call_record_found(const char* tagName, void* data) {
+void call_record_found(const char* tagName, void* data) {
     puts("call_record_found");
 }
 

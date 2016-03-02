@@ -5,6 +5,7 @@ PyMethodDef nxppy_methods[] = {
 };
 
 void initneardal() {
+    puts("initneardal");
     PyObject *module;
 
     module = Py_InitModule("neardal", AdapterMethods);
