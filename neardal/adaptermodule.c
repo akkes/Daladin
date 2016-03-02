@@ -94,6 +94,7 @@ PyObject* stop(Adapter* self, PyObject* args) {
     PyObject *result = NULL;
 
     g_main_loop_quit(gMain_loop);
+    neardal_stop_poll(self->adpName);
 
     Py_INCREF(Py_None);
     result = Py_None;
@@ -271,8 +272,103 @@ PyObject* add_callback_record_found(Adapter* self, PyObject* args) {
     return result;
 }
 
-void call_record_found(const char* tagName, void* data) {
+static void dump_record(neardal_record* pRecord)
+{
+	if( pRecord->name != NULL )
+	{
+		printf("Found record %s\r\n", pRecord->name);
+	}
+	else
+	{
+		printf("Found record\r\n");
+	}
+
+	if( pRecord->type != NULL )
+	{
+		printf("Record type: \t%s\r\n", pRecord->type);
+	}
+	else
+	{
+		printf("Unknown record type\r\n");
+	}
+
+	//Dump fields that are set
+	if( pRecord->uri != NULL )
+	{
+		printf("URI: \t%s\r\n", pRecord->uri);
+	}
+
+	if( pRecord->representation != NULL )
+	{
+		printf("Title: \t%s\r\n", pRecord->representation);
+	}
+
+	if( pRecord->action != NULL )
+	{
+		printf("Action: \t%s\r\n", pRecord->action);
+	}
+
+	if( pRecord->language != NULL )
+	{
+		printf("Language: \t%s\r\n", pRecord->language);
+	}
+
+	if( pRecord->encoding != NULL )
+	{
+		printf("Encoding: \t%s\r\n", pRecord->encoding);
+	}
+
+	if( pRecord->mime != NULL )
+	{
+		printf("MIME type: \t%s\r\n", pRecord->mime);
+	}
+
+	if( pRecord->uriObjSize > 0 )
+	{
+		printf("URI object size: \t%u\r\n", pRecord->uriObjSize);
+	}
+
+	if( pRecord->carrier != NULL )
+	{
+		printf("Carrier: \t%s\r\n", pRecord->carrier);
+	}
+
+	if( pRecord->ssid != NULL )
+	{
+		printf("SSID: \t%s\r\n", pRecord->ssid);
+	}
+
+	if( pRecord->passphrase != NULL )
+	{
+		printf("Passphrase: \t%s\r\n", pRecord->passphrase);
+	}
+
+	if( pRecord->encryption != NULL )
+	{
+		printf("Encryption: \t%s\r\n", pRecord->encryption);
+	}
+
+	if( pRecord->authentication != NULL )
+	{
+		printf("Authentication: \t%s\r\n", pRecord->authentication);
+	}
+}
+
+void call_record_found(const char* recordName, void* data) {
     puts("call_record_found");
+
+    errorCode_t	err;
+	neardal_record* pRecord;
+
+	err = neardal_get_record_properties(recordName, &pRecord);
+	if(err != NEARDAL_SUCCESS)
+	{
+		g_warning("Error %d when reading record %s (%s)\r\n", err, recordName, neardal_error_get_text(err));
+		return;
+	}
+
+	//Dump record's content
+	dump_record(pRecord);
 }
 
 /**********************
