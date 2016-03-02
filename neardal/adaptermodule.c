@@ -4,6 +4,7 @@ GMainLoop	    *gMain_loop = NULL;
 static neardal_record last_record;
 static int is_record_modified;
 static char adapter_name[30];
+static sem_t record_avaible;
 
 int
 Adapter_init(Adapter *self, PyObject *args, PyObject *kwds)
@@ -57,12 +58,14 @@ Adapter_init(Adapter *self, PyObject *args, PyObject *kwds)
     neardal_set_cb_dev_lost(call_tag_lost, self);
     neardal_set_cb_record_found(call_record_found, self);
 
+    // init semaphore
+    sem_init(&record_avaible, 0, 0);
+
     return 0;
 }
 
 void* adapter_loop(int is_from_python_thread) {
     errorCode_t	ec;
-    PyThreadState *_save;
     /* Start Discovery Loop*/
 	printf("%s\n", adapter_name);
 	ec = neardal_start_poll(adapter_name);
@@ -258,6 +261,8 @@ void call_record_found(const char* recordName, void* data) {
 	// Dump record's content
 	dump_record(pRecord);
 
+    // signal update
+    sem_post(&record_avaible);
 }
 
 PyObject* get_last_record(Adapter* self, PyObject* args) {
@@ -286,6 +291,12 @@ PyObject* get_last_record(Adapter* self, PyObject* args) {
     return dict;
 }
 
+PyObject* wait_record(Adapter* self, PyObject* args) {
+    sem_wait(&record_avaible);
+
+    Py_RETURN_NONE;
+}
+
 /**********************
  * Python definitions *
  **********************/
@@ -296,6 +307,7 @@ PyMethodDef AdapterMethods[] =
     {"launch", (PyCFunction)launch, METH_VARARGS, "launch adapter interaction"},
     {"stop", (PyCFunction)stop, METH_VARARGS, "stop adapter interaction"},
     {"get_last_record", (PyCFunction)get_last_record, METH_VARARGS, "get record record_name"},
+    {"wait_record", (PyCFunction)wait_record, METH_NOARGS, "wait for a record"},
     {NULL, NULL, 0, NULL}
 };
 

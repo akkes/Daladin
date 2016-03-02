@@ -6,6 +6,7 @@
 
 #include <glib.h>
 #include <pthread.h>
+#include <semaphore.h> 
 #include <neardal.h>
 
 typedef struct {
