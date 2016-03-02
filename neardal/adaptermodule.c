@@ -272,8 +272,7 @@ PyObject* add_callback_record_found(Adapter* self, PyObject* args) {
     return result;
 }
 
-static void dump_record(neardal_record* pRecord)
-{
+static void dump_record(neardal_record* pRecord) {
 	if( pRecord->name != NULL )
 	{
 		printf("Found record %s\r\n", pRecord->name);
@@ -369,6 +368,42 @@ void call_record_found(const char* recordName, void* data) {
 
 	//Dump record's content
 	dump_record(pRecord);
+}
+
+PyObject* get_record(Adapter* self, PyObject* args) {
+    PyObject* dict = NULL;
+    const char* recordName;
+    neardal_record* pRecord;
+
+    if (PyArg_ParseTuple(args, "s:get_record", recordName)) {
+        err = neardal_get_record_properties(recordName, &pRecord);
+    	if(err != NEARDAL_SUCCESS)
+    	{
+    		g_warning("Error %d when reading record %s (%s)\r\n", err, recordName, neardal_error_get_text(err));
+    		return;
+    	}
+
+        //build dictionnary
+        dict = Py_BuildValue("{s:s,s:s,s:s,s:s,s:s,s:s,s:s,s:s,s:s,s:s,s:s,s:s,s:s,s:s}",
+                      "action", pRecord->action,
+                      "carrier", pRecord->carrier,
+                      "encoding", pRecord->encoding,
+                      "language", pRecord->language,
+                      "MIME", pRecord->MIME,
+                      "name", pRecord->name,
+                      "representation", pRecord->representation,
+                      "size", pRecord->size,
+                      "type", pRecord->type,
+                      "SSID", pRecord->SSID,
+                      "passphrase", pRecord->passphrase,
+                      "authentication", pRecord->authentication,
+                      "encryption", pRecord->encryption,
+                      "URI", pRecord->URI);
+
+        return dict;
+    }
+
+    return NULL;
 }
 
 /**********************
