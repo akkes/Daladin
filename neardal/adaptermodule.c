@@ -1,6 +1,8 @@
 #include "adaptermodule.h"
 
 GMainLoop	    *gMain_loop = NULL;
+static neardal_record last_record;
+static int modified;
 
 int
 Adapter_init(Adapter *self, PyObject *args, PyObject *kwds)
@@ -127,126 +129,26 @@ say_hello(PyObject* self, PyObject* args)
  */
 
 // signals for action
-static PyObject* callback_adapter_added = NULL;
-PyObject* add_callback_adapter_added(Adapter* self, PyObject* args) {
-    PyObject *result = NULL;
-    PyObject *temp;
-
-    if (PyArg_ParseTuple(args, "O:set_callback", &temp)) {
-        if (!PyCallable_Check(temp)) {
-            PyErr_SetString(PyExc_TypeError, "parameter must be callable");
-            return NULL;
-        }
-        Py_XINCREF(temp);         /* Add a reference to new callback */
-        Py_XDECREF(callback_adapter_added);  /* Dispose of previous callback */
-        callback_adapter_added = temp;       /* Remember new callback */
-        /* Boilerplate to return "None" */
-        Py_INCREF(Py_None);
-        result = Py_None;
-    }
-    return result;
-}
-
 void call_adapter_added(const char* tagName, void* data) {
     puts("call_adapter_added");
 }
 
 // signals for action
-static PyObject* callback_adapter_removed = NULL;
-PyObject* add_callback_adapter_removed(Adapter* self, PyObject* args) {
-    PyObject* result = NULL;
-    PyObject* temp;
-
-    if (PyArg_ParseTuple(args, "O:set_callback", &temp)) {
-        if (!PyCallable_Check(temp)) {
-            PyErr_SetString(PyExc_TypeError, "parameter must be callable");
-            return NULL;
-        }
-        Py_XINCREF(temp);         /* Add a reference to new callback */
-        Py_XDECREF(callback_adapter_removed);  /* Dispose of previous callback */
-        callback_adapter_removed = temp;       /* Remember new callback */
-        /* Boilerplate to return "None" */
-        Py_INCREF(Py_None);
-        result = Py_None;
-    }
-    return result;
-}
-
 void call_adapter_removed(const char* tagName, void* data) {
     puts("call_adapter_removed");
 }
 
 // signals for action
-static PyObject* callback_adapter_property_changed = NULL;
-PyObject* add_callback_adapter_property_changed(Adapter* self, PyObject* args) {
-    PyObject *result = NULL;
-    PyObject *temp;
-
-    if (PyArg_ParseTuple(args, "O:set_callback", &temp)) {
-        if (!PyCallable_Check(temp)) {
-            PyErr_SetString(PyExc_TypeError, "parameter must be callable");
-            return NULL;
-        }
-        Py_XINCREF(temp);         /* Add a reference to new callback */
-        Py_XDECREF(callback_adapter_property_changed);  /* Dispose of previous callback */
-        callback_adapter_property_changed = temp;       /* Remember new callback */
-        /* Boilerplate to return "None" */
-        Py_INCREF(Py_None);
-        result = Py_None;
-    }
-    return result;
-}
-
 void call_adapter_property_changed(char *adpName, char *propName, void *value, void *user_data) {
     puts("call_adapter_property_changed");
 }
 
 // signals for action
-static PyObject* callback_tag_found = NULL;
-PyObject* add_callback_tag_found(Adapter* self, PyObject* args) {
-    PyObject *result = NULL;
-    PyObject *temp;
-
-    if (PyArg_ParseTuple(args, "O:set_callback", &temp)) {
-        if (!PyCallable_Check(temp)) {
-            PyErr_SetString(PyExc_TypeError, "parameter must be callable");
-            return NULL;
-        }
-        Py_XINCREF(temp);         /* Add a reference to new callback */
-        Py_XDECREF(callback_tag_found);  /* Dispose of previous callback */
-        callback_tag_found = temp;       /* Remember new callback */
-        /* Boilerplate to return "None" */
-        Py_INCREF(Py_None);
-        result = Py_None;
-    }
-    return result;
-}
-
 void call_tag_found(const char* tagName, void* data) {
     puts("call_tag_found");
 }
 
 // signals for action
-static PyObject* callback_tag_lost = NULL;
-PyObject* add_callback_tag_lost(Adapter* self, PyObject* args) {
-    PyObject *result = NULL;
-    PyObject *temp;
-
-    if (PyArg_ParseTuple(args, "O:set_callback", &temp)) {
-        if (!PyCallable_Check(temp)) {
-            PyErr_SetString(PyExc_TypeError, "parameter must be callable");
-            return NULL;
-        }
-        Py_XINCREF(temp);         /* Add a reference to new callback */
-        Py_XDECREF(callback_tag_lost);  /* Dispose of previous callback */
-        callback_tag_lost = temp;       /* Remember new callback */
-        /* Boilerplate to return "None" */
-        Py_INCREF(Py_None);
-        result = Py_None;
-    }
-    return result;
-}
-
 void call_tag_lost(const char* tagName, void* data) {
     puts("call_tag_lost");
     Adapter* self = (Adapter*)data;
@@ -255,32 +157,6 @@ void call_tag_lost(const char* tagName, void* data) {
 }
 
 // signals for action
-static PyObject* callback_record_found = NULL;
-PyObject* add_callback_record_found(Adapter* self, PyObject* args) {
-    PyObject *result = NULL;
-    PyObject *temp;
-
-    if (PyArg_ParseTuple(args, "O", &temp)) {
-	puts("is an object");
-        if (!PyCallable_Check(temp)) {
-            PyErr_SetString(PyExc_TypeError, "parameter must be callable");
-            return NULL;
-        }
-	puts("object is a function and callable");
-printf("Object: %0x\n", (unsigned int)callback_record_found);
-        Py_XINCREF(temp);         /* Add a reference to new callback */
-        Py_XDECREF(callback_record_found);  /* Dispose of previous callback */
-        callback_record_found = temp;       /* Remember new callback */
-PyObject_Print(callback_record_found, stdout, Py_PRINT_RAW);
-	puts("echange done");
-printf("Object: %0x\n", (unsigned int)callback_record_found);
-        /* Boilerplate to return "None" */
-        Py_INCREF(Py_None);
-        result = Py_None;
-    }
-    return result;
-}
-
 static void dump_record(neardal_record* pRecord) {
 	if( pRecord->name != NULL )
 	{
@@ -368,7 +244,7 @@ void call_record_found(const char* recordName, void* data) {
 
     errorCode_t	err;
 	neardal_record* pRecord;
-printf("%s\n", recordName);
+    printf("recordName: %s\n", recordName);
 
 	err = neardal_get_record_properties(recordName, &pRecord);
 	if(err != NEARDAL_SUCCESS)
@@ -376,57 +252,37 @@ printf("%s\n", recordName);
 		g_warning("Error %d when reading record %s (%s)\r\n", err, recordName, neardal_error_get_text(err));
 		return;
 	}
+    last_record = *pRecord;
+    modified = 1;
+    puts("got record properties");
 
 	// Dump record's content
 	// dump_record(pRecord);
 
-    puts("buildValue");
-    stringName = Py_BuildValue("s", recordName);
-    puts("callObject");
-printf("Object: %0x\n", (unsigned int)callback_record_found);
-PyObject_Print(callback_record_found, stdout, Py_PRINT_RAW);
-	puts("echange done");
-        if (!PyCallable_Check(callback_record_found)) {
-		puts("isCallable");
-            PyObject_CallObject(callback_record_found, stringName);
-        }
-    puts("end reached");
 }
 
-PyObject* get_record(Adapter* self, PyObject* args) {
+PyObject* get_last_record(Adapter* self, PyObject* args) {
     puts("get_record");
     PyObject* dict = NULL;
-    const char* recordName;
-    neardal_record* pRecord;
-    errorCode_t err;
+    modified = 0;
+    neardal_record* pRecord = &last_record;
 
-    puts("parseTuple");
-    if (PyArg_ParseTuple(args, "s", recordName)) {
-        puts("tuple is a string");
-        err = neardal_get_record_properties(recordName, &pRecord);
-    	if(err != NEARDAL_SUCCESS)
-    	{
-    		g_warning("Error %d when reading record %s (%s)\r\n", err, recordName, neardal_error_get_text(err));
-    		return NULL;
-    	}
-        puts("got record properties");
-
-        //build dictionnary
-        dict = Py_BuildValue("{s:s,s:s,s:s,s:s,s:s,s:s,s:s,s:s,s:s,s:s,s:s,s:s,s:s,s:s}",
-                      "action", pRecord->action,
-                      "carrier", pRecord->carrier,
-                      "encoding", pRecord->encoding,
-                      "language", pRecord->language,
-                      "MIME", pRecord->mime,
-                      "name", pRecord->name,
-                      "representation", pRecord->representation,
-                      "size", pRecord->uriObjSize,
-                      "type", pRecord->type,
-                      "SSID", pRecord->ssid,
-                      "passphrase", pRecord->passphrase,
-                      "authentication", pRecord->authentication,
-                      "encryption", pRecord->encryption,
-                      "URI", pRecord->uri);
+    //build dictionnary
+    dict = Py_BuildValue("{s:s,s:s,s:s,s:s,s:s,s:s,s:s,s:s,s:s,s:s,s:s,s:s,s:s,s:s}",
+                         "action",      pRecord->action,
+                         "carrier",     pRecord->carrier,
+                         "encoding",    pRecord->encoding,
+                         "language",    pRecord->language,
+                         "MIME",        pRecord->mime,
+                         "name",        pRecord->name,
+                         "representation", pRecord->representation,
+                         "size",        pRecord->uriObjSize,
+                         "type",        pRecord->type,
+                         "SSID",        pRecord->ssid,
+                         "passphrase",  pRecord->passphrase,
+                         "authentication", pRecord->authentication,
+                         "encryption",  pRecord->encryption,
+                         "URI",         pRecord->uri);
 
 	Py_INCREF(dict);
         return dict;
@@ -450,7 +306,7 @@ PyMethodDef AdapterMethods[] =
     {"add_callback_tag_found", (PyCFunction)add_callback_tag_found, METH_VARARGS, "add callback for action"},
     {"add_callback_tag_lost", (PyCFunction)add_callback_tag_lost, METH_VARARGS, "add callback for action"},
     {"add_callback_record_found", (PyCFunction)add_callback_record_found, METH_VARARGS, "add callback for action"},
-    {"get_record", (PyCFunction)get_record, METH_VARARGS, "get record record_name"},
+    {"get_last_record", (PyCFunction)get_last_record, METH_VARARGS, "get record record_name"},
     {NULL, NULL, 0, NULL}
 };
 
