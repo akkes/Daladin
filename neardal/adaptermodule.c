@@ -153,7 +153,7 @@ void call_tag_lost(const char* tagName, void* data) {
     puts("call_tag_lost");
     Adapter* self = (Adapter*)data;
 
-    pthread_create(&self->adapter_thread, 0, adapter_loop, self);
+    //pthread_create(&self->adapter_thread, 0, adapter_loop, self);
 }
 
 // signals for action
@@ -240,7 +240,6 @@ static void dump_record(neardal_record* pRecord) {
 
 void call_record_found(const char* recordName, void* data) {
     puts("call_record_found");
-    PyObject* stringName = NULL;
 
     errorCode_t	err;
 	neardal_record* pRecord;
@@ -257,7 +256,7 @@ void call_record_found(const char* recordName, void* data) {
     puts("got record properties");
 
 	// Dump record's content
-	// dump_record(pRecord);
+	dump_record(pRecord);
 
 }
 
@@ -284,11 +283,7 @@ PyObject* get_last_record(Adapter* self, PyObject* args) {
                          "encryption",  pRecord->encryption,
                          "URI",         pRecord->uri);
 
-	Py_INCREF(dict);
-        return dict;
-    }
-
-    return NULL;
+    return dict;
 }
 
 /**********************
@@ -300,12 +295,6 @@ PyMethodDef AdapterMethods[] =
     {"say_hello", (PyCFunction)say_hello, METH_VARARGS, "Greet somebody."},
     {"launch", (PyCFunction)launch, METH_VARARGS, "launch adapter interaction"},
     {"stop", (PyCFunction)stop, METH_VARARGS, "stop adapter interaction"},
-    {"add_callback_adapter_added", (PyCFunction)add_callback_adapter_added, METH_VARARGS, "add callback for action"},
-    {"add_callback_adapter_removed", (PyCFunction)add_callback_adapter_removed, METH_VARARGS, "add callback for action"},
-    {"add_callback_adapter_property_changed", (PyCFunction)add_callback_adapter_property_changed, METH_VARARGS, "add callback for action"},
-    {"add_callback_tag_found", (PyCFunction)add_callback_tag_found, METH_VARARGS, "add callback for action"},
-    {"add_callback_tag_lost", (PyCFunction)add_callback_tag_lost, METH_VARARGS, "add callback for action"},
-    {"add_callback_record_found", (PyCFunction)add_callback_record_found, METH_VARARGS, "add callback for action"},
     {"get_last_record", (PyCFunction)get_last_record, METH_VARARGS, "get record record_name"},
     {NULL, NULL, 0, NULL}
 };
