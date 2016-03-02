@@ -41,16 +41,18 @@ Adapter_init(Adapter *self, PyObject *args, PyObject *kwds)
         return 1;
     }
 
-    neardal_set_cb_adapter_added(call_adapter_added, NULL);
-    neardal_set_cb_adapter_removed(call_adapter_removed, NULL);
-    neardal_set_cb_adapter_property_changed(call_adapter_property_changed, NULL);
-    ec = neardal_set_cb_tag_found(call_tag_found, NULL);
+    neardal_set_cb_adapter_added(call_adapter_added, self);
+    neardal_set_cb_adapter_removed(call_adapter_removed, self);
+    neardal_set_cb_adapter_property_changed(call_adapter_property_changed, self);
+    ec = neardal_set_cb_tag_found(call_tag_found, self);
     if (ec != NEARDAL_SUCCESS) {
         printf("Error registering Tag found callback\n");
         return 1;
     }
-    neardal_set_cb_tag_lost(call_tag_lost, NULL);
-    neardal_set_cb_record_found(call_record_found, NULL);
+    neardal_set_cb_dev_found(call_tag_found, self);
+    neardal_set_cb_tag_lost(call_tag_lost, self);
+    neardal_set_cb_dev_lost(call_tag_lost, self);
+    neardal_set_cb_record_found(call_record_found, self);
 
     return 0;
 }
@@ -243,6 +245,9 @@ PyObject* add_callback_tag_lost(Adapter* self, PyObject* args) {
 
 void call_tag_lost(const char* tagName, void* data) {
     puts("call_tag_lost");
+    Adapter* self = (Adapter*)data;
+
+    pthread_create(&self->adapter_thread, 0, adapter_loop, self);
 }
 
 // signals for action
