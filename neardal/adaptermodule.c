@@ -71,8 +71,10 @@ void* adapter_loop(void* arg) {
 
 	gMain_loop = g_main_loop_new(NULL, FALSE);
 	if (gMain_loop) {
+Py_BEGIN_ALLOW_THREADS
 		g_main_loop_run(gMain_loop);
 		g_main_loop_unref(gMain_loop);
+Py_END_ALLOW_THREADS
 	} else
 		return (void*)1;
 
@@ -82,7 +84,8 @@ void* adapter_loop(void* arg) {
 PyObject* launch(Adapter* self, PyObject* args) {
     PyObject *result = NULL;
 
-    pthread_create(&self->adapter_thread, 0, adapter_loop, self);
+    //pthread_create(&self->adapter_thread, 0, adapter_loop, self);
+adapter_loop(self);
 
     Py_INCREF(Py_None);
     result = Py_None;
@@ -257,14 +260,20 @@ PyObject* add_callback_record_found(Adapter* self, PyObject* args) {
     PyObject *result = NULL;
     PyObject *temp;
 
-    if (PyArg_ParseTuple(args, "O:set_callback", &temp)) {
+    if (PyArg_ParseTuple(args, "O", &temp)) {
+	puts("is an object");
         if (!PyCallable_Check(temp)) {
             PyErr_SetString(PyExc_TypeError, "parameter must be callable");
             return NULL;
         }
+	puts("object is a function and callable");
+printf("Object: %0x\n", (unsigned int)callback_record_found);
         Py_XINCREF(temp);         /* Add a reference to new callback */
         Py_XDECREF(callback_record_found);  /* Dispose of previous callback */
         callback_record_found = temp;       /* Remember new callback */
+PyObject_Print(callback_record_found, stdout, Py_PRINT_RAW);
+	puts("echange done");
+printf("Object: %0x\n", (unsigned int)callback_record_found);
         /* Boilerplate to return "None" */
         Py_INCREF(Py_None);
         result = Py_None;
@@ -355,9 +364,11 @@ static void dump_record(neardal_record* pRecord) {
 
 void call_record_found(const char* recordName, void* data) {
     puts("call_record_found");
+    PyObject* stringName = NULL;
 
     errorCode_t	err;
 	neardal_record* pRecord;
+printf("%s\n", recordName);
 
 	err = neardal_get_record_properties(recordName, &pRecord);
 	if(err != NEARDAL_SUCCESS)
@@ -366,22 +377,39 @@ void call_record_found(const char* recordName, void* data) {
 		return;
 	}
 
-	//Dump record's content
-	dump_record(pRecord);
+	// Dump record's content
+	// dump_record(pRecord);
+
+    puts("buildValue");
+    stringName = Py_BuildValue("s", recordName);
+    puts("callObject");
+printf("Object: %0x\n", (unsigned int)callback_record_found);
+PyObject_Print(callback_record_found, stdout, Py_PRINT_RAW);
+	puts("echange done");
+        if (!PyCallable_Check(callback_record_found)) {
+		puts("isCallable");
+            PyObject_CallObject(callback_record_found, stringName);
+        }
+    puts("end reached");
 }
 
 PyObject* get_record(Adapter* self, PyObject* args) {
+    puts("get_record");
     PyObject* dict = NULL;
     const char* recordName;
     neardal_record* pRecord;
+    errorCode_t err;
 
-    if (PyArg_ParseTuple(args, "s:get_record", recordName)) {
+    puts("parseTuple");
+    if (PyArg_ParseTuple(args, "s", recordName)) {
+        puts("tuple is a string");
         err = neardal_get_record_properties(recordName, &pRecord);
     	if(err != NEARDAL_SUCCESS)
     	{
     		g_warning("Error %d when reading record %s (%s)\r\n", err, recordName, neardal_error_get_text(err));
-    		return;
+    		return NULL;
     	}
+        puts("got record properties");
 
         //build dictionnary
         dict = Py_BuildValue("{s:s,s:s,s:s,s:s,s:s,s:s,s:s,s:s,s:s,s:s,s:s,s:s,s:s,s:s}",
@@ -389,17 +417,18 @@ PyObject* get_record(Adapter* self, PyObject* args) {
                       "carrier", pRecord->carrier,
                       "encoding", pRecord->encoding,
                       "language", pRecord->language,
-                      "MIME", pRecord->MIME,
+                      "MIME", pRecord->mime,
                       "name", pRecord->name,
                       "representation", pRecord->representation,
-                      "size", pRecord->size,
+                      "size", pRecord->uriObjSize,
                       "type", pRecord->type,
-                      "SSID", pRecord->SSID,
+                      "SSID", pRecord->ssid,
                       "passphrase", pRecord->passphrase,
                       "authentication", pRecord->authentication,
                       "encryption", pRecord->encryption,
-                      "URI", pRecord->URI);
+                      "URI", pRecord->uri);
 
+	Py_INCREF(dict);
         return dict;
     }
 
@@ -421,6 +450,7 @@ PyMethodDef AdapterMethods[] =
     {"add_callback_tag_found", (PyCFunction)add_callback_tag_found, METH_VARARGS, "add callback for action"},
     {"add_callback_tag_lost", (PyCFunction)add_callback_tag_lost, METH_VARARGS, "add callback for action"},
     {"add_callback_record_found", (PyCFunction)add_callback_record_found, METH_VARARGS, "add callback for action"},
+    {"get_record", (PyCFunction)get_record, METH_VARARGS, "get record record_name"},
     {NULL, NULL, 0, NULL}
 };
 
