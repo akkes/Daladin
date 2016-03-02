@@ -2,7 +2,9 @@
 
 GMainLoop	    *gMain_loop = NULL;
 static neardal_record last_record;
-static int modified;
+static int is_record_modified;
+static char adapter_name[30];
+static sem_t record_avaible;
 
 int
 Adapter_init(Adapter *self, PyObject *args, PyObject *kwds)
@@ -56,38 +58,40 @@ Adapter_init(Adapter *self, PyObject *args, PyObject *kwds)
     neardal_set_cb_dev_lost(call_tag_lost, self);
     neardal_set_cb_record_found(call_record_found, self);
 
+    // init semaphore
+    sem_init(&record_avaible, 0, 0);
+
     return 0;
 }
 
-void* adapter_loop(void* arg) {
+void* adapter_loop(int is_from_python_thread) {
     errorCode_t	ec;
-    Adapter* self = (Adapter*)arg;
     /* Start Discovery Loop*/
-	printf("%s\n", self->adpName);
-	ec = neardal_start_poll(self->adpName);
+	printf("%s\n", adapter_name);
+	ec = neardal_start_poll(adapter_name);
 	if (ec != NEARDAL_SUCCESS && ec != NEARDAL_ERROR_POLLING_ALREADY_ACTIVE)
 	{
 		printf("Error starting discovery loop\n");
 		return (void*)1;
 	}
 
-	gMain_loop = g_main_loop_new(NULL, FALSE);
-	if (gMain_loop) {
-Py_BEGIN_ALLOW_THREADS
-		g_main_loop_run(gMain_loop);
-		g_main_loop_unref(gMain_loop);
-Py_END_ALLOW_THREADS
-	} else
-		return (void*)1;
-
-	return (void*)0;
+	return NULL;
 }
 
 PyObject* launch(Adapter* self, PyObject* args) {
     PyObject *result = NULL;
+    memcpy(adapter_name, self->adpName, 30*sizeof(char));
+    adapter_loop(1);
 
-    //pthread_create(&self->adapter_thread, 0, adapter_loop, self);
-adapter_loop(self);
+    Py_BEGIN_ALLOW_THREADS
+	gMain_loop = g_main_loop_new(NULL, FALSE);
+	if (gMain_loop) {
+            puts("start loop");
+            g_main_loop_run(gMain_loop);
+            g_main_loop_unref(gMain_loop);
+	} else
+		return NULL;
+    Py_END_ALLOW_THREADS
 
     Py_INCREF(Py_None);
     result = Py_None;
@@ -151,9 +155,8 @@ void call_tag_found(const char* tagName, void* data) {
 // signals for action
 void call_tag_lost(const char* tagName, void* data) {
     puts("call_tag_lost");
-    Adapter* self = (Adapter*)data;
 
-    pthread_create(&self->adapter_thread, 0, adapter_loop, self);
+    adapter_loop(0);
 }
 
 // signals for action
@@ -240,7 +243,6 @@ static void dump_record(neardal_record* pRecord) {
 
 void call_record_found(const char* recordName, void* data) {
     puts("call_record_found");
-    PyObject* stringName = NULL;
 
     errorCode_t	err;
 	neardal_record* pRecord;
@@ -253,18 +255,20 @@ void call_record_found(const char* recordName, void* data) {
 		return;
 	}
     last_record = *pRecord;
-    modified = 1;
+    is_record_modified = 1;
     puts("got record properties");
 
 	// Dump record's content
-	// dump_record(pRecord);
+	dump_record(pRecord);
 
+    // signal update
+    sem_post(&record_avaible);
 }
 
 PyObject* get_last_record(Adapter* self, PyObject* args) {
     puts("get_record");
     PyObject* dict = NULL;
-    modified = 0;
+    is_record_modified = 0;
     neardal_record* pRecord = &last_record;
 
     //build dictionnary
@@ -284,11 +288,13 @@ PyObject* get_last_record(Adapter* self, PyObject* args) {
                          "encryption",  pRecord->encryption,
                          "URI",         pRecord->uri);
 
-	Py_INCREF(dict);
-        return dict;
-    }
+    return dict;
+}
 
-    return NULL;
+PyObject* wait_record(Adapter* self, PyObject* args) {
+    sem_wait(&record_avaible);
+
+    Py_RETURN_NONE;
 }
 
 /**********************
@@ -300,13 +306,8 @@ PyMethodDef AdapterMethods[] =
     {"say_hello", (PyCFunction)say_hello, METH_VARARGS, "Greet somebody."},
     {"launch", (PyCFunction)launch, METH_VARARGS, "launch adapter interaction"},
     {"stop", (PyCFunction)stop, METH_VARARGS, "stop adapter interaction"},
-    {"add_callback_adapter_added", (PyCFunction)add_callback_adapter_added, METH_VARARGS, "add callback for action"},
-    {"add_callback_adapter_removed", (PyCFunction)add_callback_adapter_removed, METH_VARARGS, "add callback for action"},
-    {"add_callback_adapter_property_changed", (PyCFunction)add_callback_adapter_property_changed, METH_VARARGS, "add callback for action"},
-    {"add_callback_tag_found", (PyCFunction)add_callback_tag_found, METH_VARARGS, "add callback for action"},
-    {"add_callback_tag_lost", (PyCFunction)add_callback_tag_lost, METH_VARARGS, "add callback for action"},
-    {"add_callback_record_found", (PyCFunction)add_callback_record_found, METH_VARARGS, "add callback for action"},
     {"get_last_record", (PyCFunction)get_last_record, METH_VARARGS, "get record record_name"},
+    {"wait_record", (PyCFunction)wait_record, METH_NOARGS, "wait for a record"},
     {NULL, NULL, 0, NULL}
 };
 
