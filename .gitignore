@@ -1,5 +1,6 @@
 # Daladin secret files
 agregateur/daladin_spotify.key
+agregateur/tmp/*
 
 # Compiled files
 *.o
