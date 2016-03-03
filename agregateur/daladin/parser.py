@@ -3,7 +3,7 @@ import bs4 as BeautifulSoup
 import feedparser
 import re
 import constants
-import spotifyPlaylistPlayer
+import spotifyPlayer
 
 feedparser.USER_AGENT = constants.USER_AGENT
 
@@ -75,7 +75,7 @@ def selectParser(url):
     # if (re.match("^[http://|https://|www.|open.]*spotify.com", url) or
     #         re.match("^[spotify:]", url)):
     #     pass
-    if re.match("^[spotify:playlist:]", url):
-        return spotifyPlaylistPlayer.SpotifyPlaylistPlayer(url)
+    if re.match("^[spotify:]", url):
+        return spotifyPlayer.SpotifyPlaylistPlayer(url)
     else:
         return findPodcast(url)

@@ -2,8 +2,10 @@ import threading
 import spotify
 import time
 import logging
+import re
 logging.basicConfig(level=logging.INFO)
 end_of_track = threading.Event()
+
 
 def on_end_of_track(self):
     end_of_track.set()
@@ -23,13 +25,25 @@ class SpotifyPlayer(object):
         loop.start()
         audio = spotify.AlsaSink(self.session)
         self.session.login('alice', 's3cr3tp4ssw0rd')
-        while self.session.connection.state != spotify.ConnectionState.LOGGED_IN:
+        while
+        self.session.connection.state != spotify.ConnectionState.LOGGED_IN:
             self.session.process_events()
             time.sleep(1)
             print self.session.connection.state
+        if re.match("^[spotify:playlist:]", self.spotifyURI):
+            self.listing = self.session.get_playlist(self.spotifyURI)
+        else if re.match("^[spotify:album:]", self.spotifyURI):
+            self.listing = self.session.get_album(self.spotifyURI).browse()
+        else if re.match("^[spotify:artist:]", self.spotifyURI):
+            self.listing = self.session.get_album(self.spotifyURI).browse()
+        else if re.match("^[spotify:track:]", self.spotifyURI):
+            self.listing = {'tracks': array(self.session.get_track(self.spotifyURI))}
 
     def preload(self):
-        pass
+        try:
+            self.listing.load()
+        except Exception as e:
+            print e
 
     def play(self):
         self.session.on(spotify.SessionEvent.END_OF_TRACK, on_end_of_track)
