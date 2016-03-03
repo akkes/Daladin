@@ -1,13 +1,16 @@
 import threading
 import spotify
+import time
+import logging
+logging.basicConfig(level=logging.INFO)
+end_of_track = threading.Event()
+
+def on_end_of_track(self):
+    end_of_track.set()
 
 
 class SpotifyPlayer(object):
     """docstring for SpotifyPlayer"""
-    def connection_state_listener(session):
-            if self.session.connection.state is spotify.ConnectionState.LOGGED_IN:
-                logged_in_event.set()
-
     def __init__(self, arg):
         super(SpotifyPlayer, self).__init__()
         self.spotifyURI = arg
@@ -18,19 +21,26 @@ class SpotifyPlayer(object):
         self.session = spotify.Session(self.config)
         loop = spotify.EventLoop(self.session)
         loop.start()
-        self.session.on(
-            spotify.SessionEvent.CONNECTION_STATE_UPDATED,
-            self.connection_state_listener)
         audio = spotify.AlsaSink(self.session)
         self.session.login('alice', 's3cr3tp4ssw0rd')
-        logged_in_event = threading.Event()
+        while self.session.connection.state != spotify.ConnectionState.LOGGED_IN:
+            self.session.process_events()
+            time.sleep(1)
+            print self.session.connection.state
 
     def preload(self):
         pass
 
     def play(self):
-        logged_in_event.wait()
+        self.session.on(spotify.SessionEvent.END_OF_TRACK, on_end_of_track)
         for track in self.listing.tracks:
+            print "load track"
             track.load()
             self.session.player.load(track)
+            print "play track"
             self.session.player.play()
+            try:
+                while not end_of_track.wait(0.1):
+                    pass
+            except KeyboardInterrupt:
+                pass

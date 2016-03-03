@@ -8,7 +8,9 @@ def main():
         return 1
 
     player = selectParser(sys.argv[1])
-    player.load()
+    print "preload"
+    player.preload()
+    print "play"
     player.play()
 
 if __name__ == '__main__':

@@ -8,7 +8,11 @@ class SpotifyPlaylistPlayer(spotifyPlayer.SpotifyPlayer):
         self.playlist = self.session.get_playlist(self.spotifyURI)
 
     def preload(self):
-        self.playlist.load()
+	super(SpotifyPlaylistPlayer, self).preload()
+        try:
+            self.playlist.load()
+        except Exception as e:
+            print e
 
     def play(self):
         self.listing = self.playlist
