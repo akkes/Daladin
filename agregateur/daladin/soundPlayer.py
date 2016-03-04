@@ -12,7 +12,7 @@ config = None
 should_play = True
 
 
-def on_end_of_track():
+def on_end_of_track(session):
     end_of_track.set()
 
 
@@ -51,6 +51,13 @@ def checkConnection():
 
 def getTracksContainer(URI):
     global session
+    # remove specific user URI prefix if needed
+    if re.match("^spotify:user:", URI):
+        URI = re.sub("^spotify:user:[A-z]+:collection:",
+               "spotify:",
+               URI)
+
+    # get object according to URI format
     if re.match("^spotify:playlist:", URI):
         return session.get_playlist(URI)
     elif re.match("^spotify:album:", URI):
@@ -80,9 +87,7 @@ def stop():
 def actualPlay(listing):
     print "actualPlay"
     i = 0
-    print "yolo"
     should_play = True
-    print "yolo"
     print str(i) + " < " + str(len(listing.tracks)) + " and " + str(should_play)
     while (i < len(listing.tracks) and should_play is True):
         track = listing.tracks[i]
@@ -92,11 +97,12 @@ def actualPlay(listing):
         print "play track " + track.name
         session.player.play()
         try:
-            while not end_of_track.wait(0.1):
+            while not end_of_track.wait():
                 pass
         except KeyboardInterrupt:
             pass
         i += 1
+    print "end of tracks"
 
 
 def play(URI):
