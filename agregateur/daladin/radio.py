@@ -8,9 +8,9 @@ class Radio(object):
         self.items = []
         self.playedItem = None
 
-    def addItem(self, newItem):
-        if arg not in self.items:
-            self.items.append(newItem)
+    def addItem(self, new_item):
+        if new_item not in self.items:
+            self.items.append(new_item)
 
     def playItem(self, item):
         item.play()

@@ -30,13 +30,13 @@ class SpotifyPlayer(abstractPlayer):
             self.session.process_events()
             time.sleep(1)
             print self.session.connection.state
-        if re.match("^[spotify:playlist:]", self.spotifyURI):
+        if re.match("^spotify:playlist:", self.spotifyURI):
             self.listing = self.session.get_playlist(self.spotifyURI)
-        elif re.match("^[spotify:album:]", self.spotifyURI):
+        elif re.match("^spotify:album:", self.spotifyURI):
             self.listing = self.session.get_album(self.spotifyURI).browse()
-        elif re.match("^[spotify:artist:]", self.spotifyURI):
+        elif re.match("^spotify:artist:", self.spotifyURI):
             self.listing = self.session.get_album(self.spotifyURI).browse()
-        elif re.match("^[spotify:track:]", self.spotifyURI):
+        elif re.match("^spotify:track:", self.spotifyURI):
             self.listing = {'tracks': array(self.
                             session.get_track(self.spotifyURI))}
 
