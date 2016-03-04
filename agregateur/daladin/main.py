@@ -1,37 +1,19 @@
 import sys
-import neardal
 import threading
-from parser import *
 
-ad = neardal.Adapter()
-
-
-def foo(bar):
-    print "foo"
-    print ad.get_record(bar)
+import radio
+import ndef
 
 
 def main():
-    if len(sys.argv) <= 1:
-        print "Error: no url given"
-        return 1
+    # Prepare environement
+    radios = [radio.Radio()]
 
-    # get URI through NFC-NDEF
+    # Setup NDEF listening
+    ndef_listener = ndef.NDEFReader(radios)
+    ndef_listener.startPolling()
 
-    t = threading.Thread(target=ad.launch)
-    t.start()
-
-    record = ad.get_last_record()
-    while record['type'] != 'URI' and record['type'] != 'SmartCard':
-        ad.wait_record()
-        record = ad.get_last_record()
-    ad.stop()
-
-    player = selectParser(record['URI'])
-    print "preload"
-    player.preload()
-    print "play"
-    player.play()
+    # setup buttons listening
 
 if __name__ == '__main__':
     main()
