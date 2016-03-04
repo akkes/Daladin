@@ -1,4 +1,4 @@
-import abstractPlayer
+import SoundPlayer
 
 
 class Radio(object):
@@ -13,8 +13,8 @@ class Radio(object):
             self.items.append(new_item)
 
     def playItem(self, item):
-        print "play item"
-        item.play()
+        print "play item" + item
+        SoundPlayer.play(item)
 
     def play(self):
         # TODO: select item based on Djinn predictions
@@ -24,5 +24,5 @@ class Radio(object):
                 break
 
     def stop(self):
-        self.playedItem.stop()
+        SoundPlayer.stop()
         self.playedItem = None

@@ -3,10 +3,12 @@ import threading
 
 import radio
 import ndef
+import soundPlayer
 
 
 def main():
     # Prepare environement
+    soundPlayer.createSoundPlayer()
     radios = [radio.Radio()]
 
     # Setup NDEF listening

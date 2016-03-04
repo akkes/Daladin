@@ -31,6 +31,7 @@ class NDEFReader(object):
             # add it to the radio and play it
             print "detected URI:" + record['URI']
             player = selectParser(record['URI'])
+            # TODO: select radio, and create it if necessary
             self.radios[0].addItem(player)
             self.radios[0].playItem(player)
             record = None
