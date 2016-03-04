@@ -3,6 +3,7 @@ import constants
 import logging
 import threading
 import time
+import re
 
 logging.basicConfig(level=logging.INFO)
 end_of_track = threading.Event()
@@ -11,7 +12,7 @@ config = None
 should_play = True
 
 
-def on_end_of_track():
+def on_end_of_track(session):
     end_of_track.set()
 
 
@@ -50,15 +51,22 @@ def checkConnection():
 
 def getTracksContainer(URI):
     global session
-    if re.match("^spotify:playlist:", self.spotifyURI):
-        return session.get_playlist(self.spotifyURI)
-    elif re.match("^spotify:album:", self.spotifyURI):
-        return session.get_album(self.spotifyURI).browse()
-    elif re.match("^spotify:artist:", self.spotifyURI):
-        return session.get_artist(self.spotifyURI).browse()
-    elif re.match("^spotify:track:", self.spotifyURI):
+    # remove specific user URI prefix if needed
+    if re.match("^spotify:user:", URI):
+        URI = re.sub("^spotify:user:[A-z]+:collection:",
+               "spotify:",
+               URI)
+
+    # get object according to URI format
+    if re.match("^spotify:playlist:", URI):
+        return session.get_playlist(URI)
+    elif re.match("^spotify:album:", URI):
+        return session.get_album(URI).browse()
+    elif re.match("^spotify:artist:", URI):
+        return session.get_artist(URI).browse()
+    elif re.match("^spotify:track:", URI):
         return {'tracks': array(session.
-                                get_track(self.spotifyURI))}
+                                get_track(URI))}
     else:
         print "not a spotify URI, files are not (Yet) supported"
 
@@ -76,7 +84,29 @@ def stop():
     should_play = False
 
 
+def actualPlay(listing):
+    print "actualPlay"
+    i = 0
+    should_play = True
+    print str(i) + " < " + str(len(listing.tracks)) + " and " + str(should_play)
+    while (i < len(listing.tracks) and should_play is True):
+        track = listing.tracks[i]
+        print "load track"
+        track.load()
+        session.player.load(track)
+        print "play track " + track.name
+        session.player.play()
+        try:
+            while not end_of_track.wait():
+                pass
+        except KeyboardInterrupt:
+            pass
+        i += 1
+    print "end of tracks"
+
+
 def play(URI):
+    print "play"
     global session
     stop()
     checkConnection()
@@ -88,17 +118,6 @@ def play(URI):
     preload(listing)
 
     # play it
-    i = 0
-    should_play = True
-    while (i < len(listing.tracks) and should_play is True):
-        track = listing[i]
-        print "load track"
-        track.load()
-        session.player.load(track)
-        print "play track" + track.name
-        session.player.play()
-        try:
-            while not end_of_track.wait(0.1):
-                pass
-        except KeyboardInterrupt:
-            pass
+    print "start playing thread"
+    playing_thread = threading.Thread(target=actualPlay, args=(listing,))
+    playing_thread.start()
