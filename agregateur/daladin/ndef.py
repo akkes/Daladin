@@ -1,7 +1,7 @@
 import neardal
 import threading
 
-import parser
+from parser import *
 import radio
 import spotifyPlayer
 
@@ -12,13 +12,14 @@ class NDEFReader(object):
         super(NDEFReader, self).__init__()
         self.radios = radios
         self.ad = neardal.Adapter()
+        self.stopped = False
 
     def startPolling(self):
         t = threading.Thread(target=self.ad.launch)
         t.start()
 
         # get original record
-        record = ad.get_last_record()
+        record = self.ad.get_last_record()
 
         # wait for a Beam and handle it
         while self.stopped is False:
@@ -27,13 +28,14 @@ class NDEFReader(object):
                 record = self.ad.get_last_record()
 
             # add it to the radio and play it
+            print record['URI']
             player = selectParser(record['URI'])
             self.radios[0].addItem(player)
             self.radios[0].playItem(player)
 
         # stop when asked
-        ad.stop()
+        self.ad.stop()
 
     def stopPolling(self):
         self.stopped = True
-        ad.stop()
+        self.ad.stop()

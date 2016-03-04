@@ -1,10 +1,10 @@
 import abstractPlayer
 
 
-class radio(object):
-    """docstring for radio"""
+class Radio(object):
+    """docstring for Radio"""
     def __init__(self):
-        super(radio, self).__init__()
+        super(Radio, self).__init__()
         self.items = []
         self.playedItem = None
 

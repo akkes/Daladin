@@ -3,7 +3,7 @@ import spotify
 import time
 import logging
 import re
-import abstractPlayer
+from abstractPlayer import *
 logging.basicConfig(level=logging.INFO)
 end_of_track = threading.Event()
 
@@ -15,7 +15,7 @@ def on_end_of_track(self):
 class SpotifyPlayer(abstractPlayer):
     """docstring for SpotifyPlayer"""
     def __init__(self, arg):
-        super(SpotifyPlayer, self).__init__()
+        super(SpotifyPlayer, self).__init__(arg)
         self.spotifyURI = arg
         self.config = spotify.Config()
         self.config.user_agent = 'Daladin Radio '
@@ -26,18 +26,17 @@ class SpotifyPlayer(abstractPlayer):
         loop.start()
         audio = spotify.AlsaSink(self.session)
         self.session.login('alice', 's3cr3tp4ssw0rd')
-        while
-        self.session.connection.state != spotify.ConnectionState.LOGGED_IN:
+        while self.session.connection.state != spotify.ConnectionState.LOGGED_IN:
             self.session.process_events()
             time.sleep(1)
             print self.session.connection.state
         if re.match("^[spotify:playlist:]", self.spotifyURI):
             self.listing = self.session.get_playlist(self.spotifyURI)
-        else if re.match("^[spotify:album:]", self.spotifyURI):
+        elif re.match("^[spotify:album:]", self.spotifyURI):
             self.listing = self.session.get_album(self.spotifyURI).browse()
-        else if re.match("^[spotify:artist:]", self.spotifyURI):
+        elif re.match("^[spotify:artist:]", self.spotifyURI):
             self.listing = self.session.get_album(self.spotifyURI).browse()
-        else if re.match("^[spotify:track:]", self.spotifyURI):
+        elif re.match("^[spotify:track:]", self.spotifyURI):
             self.listing = {'tracks': array(self.
                             session.get_track(self.spotifyURI))}
 
