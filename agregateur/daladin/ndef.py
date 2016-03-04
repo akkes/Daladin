@@ -22,13 +22,10 @@ class NDEFReader(object):
         original_record = self.ad.get_last_record()
 
         # wait for a Beam and handle it
-        i = 0
         while self.stopped is False:
             record = original_record
             while record['type'] != 'URI' and record['type'] != 'SmartCard':
                 self.ad.wait_record()
-                i += 1
-                print "get record" + str(i)
                 record = self.ad.get_last_record()
 
             # add it to the radio and play it
