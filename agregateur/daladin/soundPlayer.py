@@ -1,5 +1,8 @@
 import spotify
 import constants
+import logging
+import threading
+import time
 
 logging.basicConfig(level=logging.INFO)
 end_of_track = threading.Event()
@@ -8,11 +11,13 @@ config = None
 should_play = True
 
 
-def on_end_of_track(self):
+def on_end_of_track():
     end_of_track.set()
 
 
-def createSoundPlayer(self, arg):
+def createSoundPlayer():
+    global session
+    global config
     if (session is None and config is None):
         # configure spotifySDK
         config = spotify.Config()
@@ -34,16 +39,17 @@ def createSoundPlayer(self, arg):
 
         # event handling
         session.on(spotify.SessionEvent.END_OF_TRACK,
-                   def on_end_of_track(self):
-                       end_of_track.set())
+                   on_end_of_track)
 
 
 def checkConnection():
+    global session
     if session.connection.state != spotify.ConnectionState.LOGGED_IN:
         session.relogin()
 
 
 def getTracksContainer(URI):
+    global session
     if re.match("^spotify:playlist:", self.spotifyURI):
         return session.get_playlist(self.spotifyURI)
     elif re.match("^spotify:album:", self.spotifyURI):
@@ -65,11 +71,13 @@ def preload(listing):
 
 
 def stop():
+    global session
     session.player.unload()
     should_play = False
 
 
 def play(URI):
+    global session
     stop()
     checkConnection()
 

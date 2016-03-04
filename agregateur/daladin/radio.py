@@ -1,4 +1,4 @@
-import SoundPlayer
+import soundPlayer
 
 
 class Radio(object):
@@ -14,7 +14,7 @@ class Radio(object):
 
     def playItem(self, item):
         print "play item" + item
-        SoundPlayer.play(item)
+        soundPlayer.play(item)
 
     def play(self):
         # TODO: select item based on Djinn predictions
@@ -24,5 +24,5 @@ class Radio(object):
                 break
 
     def stop(self):
-        SoundPlayer.stop()
+        soundPlayer.stop()
         self.playedItem = None
