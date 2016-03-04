@@ -13,6 +13,7 @@ class Radio(object):
             self.items.append(new_item)
 
     def playItem(self, item):
+        print "play item"
         item.play()
 
     def play(self):

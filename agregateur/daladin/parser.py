@@ -75,7 +75,7 @@ def selectParser(url):
     # if (re.match("^[http://|https://|www.|open.]*spotify.com", url) or
     #         re.match("^[spotify:]", url)):
     #     pass
-    if re.match("^[spotify:]", url):
+    if re.match("^spotify:", url):
         return spotifyPlayer.SpotifyPlayer(url)
     else:
         return findPodcast(url)

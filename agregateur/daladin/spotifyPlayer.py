@@ -16,6 +16,7 @@ class SpotifyPlayer(abstractPlayer):
     """docstring for SpotifyPlayer"""
     def __init__(self, arg):
         super(SpotifyPlayer, self).__init__(arg)
+        print "start new spotify player for: " + arg
         self.spotifyURI = arg
         self.config = spotify.Config()
         self.config.user_agent = 'Daladin Radio '
@@ -25,6 +26,8 @@ class SpotifyPlayer(abstractPlayer):
         loop = spotify.EventLoop(self.session)
         loop.start()
         audio = spotify.AlsaSink(self.session)
+
+        # relogin & connect
         self.session.login('alice', 's3cr3tp4ssw0rd')
         while self.session.connection.state != spotify.ConnectionState.LOGGED_IN:
             self.session.process_events()
@@ -47,6 +50,8 @@ class SpotifyPlayer(abstractPlayer):
             print e
 
     def play(self):
+        print "play from spotifyPlayer"
+        self.preload()
         self.session.on(spotify.SessionEvent.END_OF_TRACK, on_end_of_track)
         for track in self.listing.tracks:
             print "load track"
