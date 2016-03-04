@@ -3,6 +3,7 @@ import spotify
 import time
 import logging
 import re
+import abstractPlayer
 logging.basicConfig(level=logging.INFO)
 end_of_track = threading.Event()
 
@@ -11,7 +12,7 @@ def on_end_of_track(self):
     end_of_track.set()
 
 
-class SpotifyPlayer(object):
+class SpotifyPlayer(abstractPlayer):
     """docstring for SpotifyPlayer"""
     def __init__(self, arg):
         super(SpotifyPlayer, self).__init__()
@@ -37,7 +38,8 @@ class SpotifyPlayer(object):
         else if re.match("^[spotify:artist:]", self.spotifyURI):
             self.listing = self.session.get_album(self.spotifyURI).browse()
         else if re.match("^[spotify:track:]", self.spotifyURI):
-            self.listing = {'tracks': array(self.session.get_track(self.spotifyURI))}
+            self.listing = {'tracks': array(self.
+                            session.get_track(self.spotifyURI))}
 
     def preload(self):
         try:
@@ -58,3 +60,6 @@ class SpotifyPlayer(object):
                     pass
             except KeyboardInterrupt:
                 pass
+
+    def stop(self):
+        self.session.player.pause()
