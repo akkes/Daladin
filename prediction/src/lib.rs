@@ -148,8 +148,8 @@ impl Makrov {
 #[test]
 fn it_works() {
     let mut mTest = Makrov::new(4, 10000, 0);
-    println!("{:?}", mTest.printValues());
-    println!("{:?}", mTest.sum(0));
+    //println!("{:?}", mTest.printValues());
+    //println!("{:?}", mTest.sum(0));
     println!("{:?}", mTest.get_probability(2, 3, Duration::minutes(90), time::strptime("1-14-47-26", "%w-%H-%M-%S").unwrap()));
 
 }
