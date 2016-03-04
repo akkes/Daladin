@@ -33,8 +33,8 @@ class Content:
                 score+=1
         return score >= min(len(self.genres), len(other.genres))/2
 
-test = Content("spotify:track:201zQBi6BQfVIpqws3jDXT", "Booba")
-test2 = Content("spotify:track:201zQBi6BQfVIpqws3jDXT", "Oxmo Puccino")
+test = Content("spotify:track:201zQBi6BQfVIpqws3jDXT", "DMX")
+test2 = Content("spotify:track:201zQBi6BQfVIpqws3jDXT", "Ray Charles")
 print("Score de similarité : " + str(test.similarity(test2)))
 
 sample_uri = "spotify:track:201zQBi6BQfVIpqws3jDXT"

@@ -3,6 +3,11 @@ name = "prediction"
 version = "0.1.0"
 authors = ["uj <sudo.screenlife@gmail.com>"]
 
+
+[lib]
+name = "prediction"
+crate-type = ["dylib"]
+
 [dependencies]
 
 rand = "0.3.0"
