@@ -306,7 +306,22 @@ PyMethodDef AdapterMethods[] =
     {"say_hello", (PyCFunction)say_hello, METH_VARARGS, "Greet somebody."},
     {"launch", (PyCFunction)launch, METH_VARARGS, "launch adapter interaction"},
     {"stop", (PyCFunction)stop, METH_VARARGS, "stop adapter interaction"},
-    {"get_last_record", (PyCFunction)get_last_record, METH_VARARGS, "get record record_name"},
+    {"get_last_record", (PyCFunction)get_last_record, METH_VARARGS, "get record the last received record.
+:return: a dictionnary with keys:
+    - SSID
+    - name
+    - language
+    - encoding
+    - encryption
+    - URI
+    - authentication
+    - carrier
+    - MIME
+    - passphrase
+    - action
+    - representation
+    - type
+    - size "},
     {"wait_record", (PyCFunction)wait_record, METH_NOARGS, "wait for a record"},
     {NULL, NULL, 0, NULL}
 };
