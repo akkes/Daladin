@@ -36,6 +36,13 @@ sudo dpkg -i libneardal-dev_0.14.2-1_armhf.deb
 #./configure --disable-dependency-tracking --prefix=/usr --sysconfdir=/etc
 #make
 
+# clone repo
+git clone https://github.com/akkes/Daladin.git
+
+# install neardal Python binding
+cd neardal
+python setup.py build && sudo python setup.py install
+
 # add user
 # mkdir /
 # useradd [options]  aladin [Options: -c comment -d dir -e date -f days -g group -G groups -k [dir]  -m -M -n -o -p passwd -r -s shell -u uid -D [options] ]
