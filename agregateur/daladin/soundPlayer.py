@@ -49,13 +49,20 @@ def checkConnection():
         session.relogin()
 
 
-def getTracksContainer(URI):
-    global session
+def cleanURI(arg):
     # remove specific user URI prefix if needed
     if re.match("^spotify:user:", URI):
         URI = re.sub("^spotify:user:[A-z]+:collection:",
-               "spotify:",
-               URI)
+                     "spotify:",
+                     URI)
+    return URI
+
+
+def getTracksContainer(URI):
+    global session
+
+    # clean URI
+    URI = cleanURI(URI)
 
     # get object according to URI format
     if re.match("^spotify:playlist:", URI):
