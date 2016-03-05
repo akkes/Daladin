@@ -6,6 +6,7 @@ use self::time::Tm;
 use self::rand::Rng;
 use std::cmp::PartialOrd;
 ///Represents a Makrov chain.
+#[no_mangle]
 pub struct Makrov {
     number_of_chains: u32,
     sensibility: u32,
