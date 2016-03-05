@@ -90,17 +90,18 @@ def actualPlay(listing):
     should_play = True
     print str(i) + " < " + str(len(listing.tracks)) + " and " + str(should_play)
     while (i < len(listing.tracks) and should_play is True):
-        track = listing.tracks[i]
-        print "load track"
-        track.load()
-        session.player.load(track)
-        print "play track " + track.name
-        session.player.play()
         try:
-            while not end_of_track.wait():
-                pass
-        except KeyboardInterrupt:
-            pass
+            # clear events so we don't trigger them again
+            end_of_track.clear()
+            track = listing.tracks[i]
+            print "load track"
+            track.load()
+            session.player.load(track)
+            print "play track " + track.name
+            session.player.play()
+            end_of_track.wait()
+        except spotify.LibError:
+            print "cannot play track for some Spotify weirdness"
         i += 1
     print "end of tracks"
 
