@@ -9,12 +9,12 @@ class Radio(object):
         self.contents = []
         self.played_content = None
 
-    def addItem(self, new_content):
+    def addContent(self, new_content):
         if new_content not in self.contents:
             self.contents.append(new_content)
 
     def playContent(self, item):
-        print "play content" + item.
+        print "play content" + item.name
         soundPlayer.play(item.uri)
 
     def play(self):

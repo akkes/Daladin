@@ -31,7 +31,8 @@ def createSoundPlayer():
         audio = spotify.AlsaSink(session)
 
         # connect
-        session.login('alice', 's3cr3tp4ssw0rd', remember_me=True)
+        #session.login('alice', 's3cr3tp4ssw0rd', remember_me=True)
+        session.login('akkes', '3rtymoze!', remember_me=True)
         while (session.connection.state != spotify.ConnectionState.
                LOGGED_IN):
             session.process_events()
@@ -49,7 +50,7 @@ def checkConnection():
         session.relogin()
 
 
-def cleanURI(arg):
+def cleanURI(URI):
     # remove specific user URI prefix if needed
     if re.match("^spotify:user:", URI):
         URI = re.sub("^spotify:user:[A-z]+:collection:",

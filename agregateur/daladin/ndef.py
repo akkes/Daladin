@@ -2,6 +2,7 @@ import neardal
 import threading
 
 from parser import *
+import content
 import radio
 import spotifyPlayer
 
@@ -30,10 +31,10 @@ class NDEFReader(object):
 
             # add it to the radio and play it
             print "detected URI:" + record['URI']
-            player = selectParser(record['URI'])
+            player = content.Content(selectParser(record['URI']))
             # TODO: select radio, and create it if necessary
-            self.radios[0].addItem(player)
-            self.radios[0].playItem(player)
+            self.radios[0].addContent(player)
+            self.radios[0].playContent(player)
             record = None
 
         # stop when asked
