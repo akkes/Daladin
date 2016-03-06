@@ -157,7 +157,7 @@ pub extern fn get_first_first_probability() -> f64 {
 fn it_works() {
     let mut mTest = Markov::new(4, 0.1, 0);
     mTest.printValues();
-    mTest.set_hour(0, time::strptime("5-14-12-26", "%w-%H-%M-%S").unwrap());
+    //mTest.set_hour(0, time::strptime("2-14-12-26", "%w-%H-%M-%S").unwrap());
     for i in 1..100 {
         println!("{:?}", mTest.get_next_node());
     }
