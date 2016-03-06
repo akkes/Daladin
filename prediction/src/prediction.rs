@@ -16,7 +16,7 @@ impl Register {
         }
     }
     pub fn get_size(&self) -> u32 {
-        return self.register.len()
+        return self.register.len() as u32
     }
     pub fn add_radio(&mut self) -> usize {
         self.register.push(Markov::new(1, 0.1, 0));

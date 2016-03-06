@@ -26,7 +26,5 @@ class Register:
         return lib.register_add_radio(self.obj)
 
 with Register() as register:
-    a = register.add_radio()
-    a = register.add_radio()
     #a = register.get_size()
-    print(a)
+    #print(a)
