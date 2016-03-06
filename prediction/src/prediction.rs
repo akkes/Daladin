@@ -25,6 +25,12 @@ impl Register {
     pub fn add_content(&mut self, markov_id : usize) -> usize {
         self.register[markov_id].add_node()
     }
+    pub fn get_next_content(&mut self, markov_id : usize) -> usize {
+        self.register[markov_id].get_next_node()
+    }
+    pub fn apply_feedback(&mut self, markov_id : usize, feedback : bool) {
+        self.register[markov_id].apply_feedback(feedback)
+    }
 }
 
 //FOR FFI
@@ -64,4 +70,26 @@ pub extern fn register_add_content(ptr : *mut Register, markov_id : uint32_t) ->
         &mut *ptr
     };
     return register.add_content(markov_id as usize) as u32
+}
+
+#[no_mangle]
+pub extern fn register_get_next_content(ptr : *mut Register, markov_id : uint32_t) -> uint32_t {
+    let register = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
+    return register.get_next_content(markov_id as usize) as u32;
+}
+
+#[no_mangle]
+pub extern fn register_apply_feedback(ptr : *mut Register, markov_id : uint32_t, feedback : uint32_t) {
+    let register = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
+    if feedback == 0 {
+        register.apply_feedback(markov_id as usize, false);
+    } else {
+        register.apply_feedback(markov_id as usize, true);
+    }
 }

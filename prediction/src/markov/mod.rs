@@ -191,7 +191,7 @@ impl Markov {
             let delta = now-self.hours[lcn];
             //println!("{:?}", delta);
             //println!("{:?}", self.hours[lcn] + delta);
-            if(now<self.hours[lcn]) {
+            if now<self.hours[lcn]  {
                 self.hours[lcn] = self.hours[lcn] - delta/2;
             } else {
                 self.hours[lcn] = self.hours[lcn] + delta/2;
@@ -210,7 +210,7 @@ impl Markov {
 
 #[test]
 fn it_works() {
-    let mut mTest = Markov::new(3, 0.1, 0);
+    let mut mTest = Markov::new(3, 0.05, 0);
     mTest.set_debug_nodes();
     println!("{:?}", mTest.get_probability(0, 1));
     println!("{:?}", mTest.get_hour(1));
