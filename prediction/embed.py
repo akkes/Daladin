@@ -13,6 +13,8 @@ lib.register_get_size.argtypes = (POINTER(RegisterS), )
 lib.register_add_radio.restype = c_uint32
 lib.register_add_radio.argtypes = (POINTER(RegisterS), )
 
+lib.register_add_content.restype = c_uint32
+lib.register_add_content.argtypes = (POINTER(RegisterS), c_uint32)
 class Register:
     def __init__(self):
         self.obj = lib.register_new()
@@ -24,7 +26,10 @@ class Register:
         return lib.register_get_size(self.obj)
     def add_radio(self):
         return lib.register_add_radio(self.obj)
+    def add_content(self, markov_id):
+        return lib.register_add_content(self.obj, markov_id)
 
 with Register() as register:
-    #a = register.get_size()
-    #print(a)
+    sample_radio = register.add_radio()
+    sample_content = register.add_content(sample_radio)
+    print(sample_content)

@@ -12,6 +12,7 @@ pub struct Markov {
     values: Vec<Vec<f64>>,
     durations: Vec<Duration>,
     hours: Vec<Tm>,
+    previous_checked_node : usize,
     last_checked_node : usize, //Is it useful ?
 }
 impl Markov {
@@ -27,6 +28,7 @@ impl Markov {
             values : Markov::init_values(number_of_chains, starting_node),
             durations : vec![Duration::minutes(60);number_of_chains as usize],
             hours : vec![time::strptime("2-14-47-26", "%w-%H-%M-%S").unwrap();number_of_chains as usize],
+            previous_checked_node : 0,
             last_checked_node : starting_node, /*It is.*/
         }
     }
@@ -53,6 +55,9 @@ impl Markov {
     }
     pub fn get_last_checked_node(&self) -> usize {
         self.last_checked_node
+    }
+    pub fn get_previous_checked_node(&self) -> usize {
+        self.previous_checked_node
     }
     pub fn get_number_of_chains(&self) -> u32 {
         self.number_of_chains
@@ -115,8 +120,10 @@ impl Markov {
         self.durations[id]
     }
     pub fn get_next_node(&mut self) -> usize {
+        self.previous_checked_node = self.last_checked_node;
         let lcn = self.last_checked_node;
         let mut gaussian_probs = vec![0f64; self.number_of_chains as usize];
+        //println!("Taille gauss {:?}", gaussian_probs.len());
         for i in 0..gaussian_probs.len() {
             gaussian_probs[i] = self.get_probability(lcn, i);
         }
@@ -137,7 +144,7 @@ impl Markov {
         //println!("{:?}", self.get_hour(3));
         return 1;
     }
-    pub fn add_node(&mut self) {
+    pub fn add_node(&mut self) -> usize {
         //let default_prob = 1f64/(self.number_of_chains+1) as f64;
         for i in 0..self.number_of_chains {
             self.values[i as usize].push(0f64);
@@ -146,35 +153,53 @@ impl Markov {
         self.values.push(vec![1f64/self.number_of_chains as f64; self.number_of_chains as usize]);
         let noc = self.number_of_chains;
         for i in 0..noc {
-            println!("RESTE {:?}", 1f64/self.number_of_chains as f64);
+            //println!("RESTE {:?}", 1f64/self.number_of_chains as f64);
             //self.values[i as usize][self.number_of_chains as usize - 1] = 1f64/self.number_of_chains as f64;
             self.set_value(i as usize, noc as usize -1, 1f64/noc as f64);
         }
-        //self.set_value()
+        let  mut hour = time::now();
+        hour.tm_mday = 0;
+        hour.tm_mon = 0;
+        hour.tm_year = 0;
+        hour.tm_yday = 0;
+        hour.tm_utcoff = 0;
+        hour.tm_nsec = 0;
+        self.hours.push(hour);
+        self.durations.push(Duration::minutes(60)); //TODO: Make actual duration matter
+
+        return self.number_of_chains as usize -1;
     }
-    pub fn apply_feedback(&mut self, feedback : bool, startingNode : usize) { //TODO: Vérifier le bon fonctionnement
+    pub fn apply_feedback(&mut self, feedback : bool) { //TODO: Vérifier le bon fonctionnement
         let lcn = self.last_checked_node;
+        let pcn = self.previous_checked_node;
         let mut sensibility_to_apply = self.sensibility;
-        let mut new_value = self.get_value(startingNode, lcn);
+        let mut new_value = self.get_value(pcn, lcn);
         if !feedback {
             sensibility_to_apply *= -1f64;
         }
-        self.set_value(startingNode, lcn, new_value + sensibility_to_apply);
+        self.set_value(pcn, lcn, new_value + sensibility_to_apply);
     }
 }
 
 #[test]
 fn it_works() {
-    let mut mTest = Markov::new(3, 0.1, 0);
+    let mut mTest = Markov::new(1, 0.1, 0);
     mTest.printValues();
-    mTest.set_value(2, 1, 0.4);
-    mTest.add_node();
-    mTest.printValues();
+    println!("{:?}", mTest.get_number_of_chains());
+    println!("ID du nouveau contenu {:?}", mTest.add_node());
+    //mTest.set_value(2, 1, 0.4);
+    //mTest.add_node();
+    //mTest.add_node();
+    //mTest.add_node();
+    //mTest.add_node();
+    println!("{:?}", mTest.get_number_of_chains());
+    //println!("{:?}", mTest.get_values().get(1).unwrap().len());
+    //mTest.printValues();
     //println!("{:?}", mTest.sum(2));
     //mTest.set_hour(0, time::strptime("2-14-12-26", "%w-%H-%M-%S").unwrap());
-    /*for i in 1..100 {
+    for i in 1..10 {
         println!("{:?}", mTest.get_next_node());
-    }*/
+    }
 
     //println!("{:?}", mTest.get_probability(2, 3, Duration::minutes(90), time::strptime("1-14-47-26", "%w-%H-%M-%S").unwrap()));
 }

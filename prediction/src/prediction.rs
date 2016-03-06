@@ -22,8 +22,8 @@ impl Register {
         self.register.push(Markov::new(1, 0.1, 0));
         return self.register.len()-1; //The ID of the newly created Markov chain.
     }
-    pub fn add_content(&mut self, markov_id : usize) -> i32 {
-        return 1; //The ID of the content in the markov chain 'ID'
+    pub fn add_content(&mut self, markov_id : usize) -> usize {
+        self.register[markov_id].add_node()
     }
 }
 
@@ -55,4 +55,13 @@ pub extern fn register_add_radio(ptr : *mut Register) -> uint32_t {
         &mut *ptr
     };
     return register.add_radio() as uint32_t
+}
+
+#[no_mangle]
+pub extern fn register_add_content(ptr : *mut Register, markov_id : uint32_t) -> uint32_t {
+    let register = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
+    return register.add_content(markov_id as usize) as u32
 }
