@@ -77,6 +77,10 @@ impl Markov {
         }
         return 1;
     }*/
+    pub fn set_debug_nodes(&mut self) {
+        self.previous_checked_node = 0;
+        self.last_checked_node = 1;
+    }
     pub fn set_value(&mut self, from : usize, to: usize, value : f64) {
         //TODO: Chack if float isn't 0<float<1
         //TODO : NOT OVERFLOW SAFE !
@@ -96,7 +100,7 @@ impl Markov {
     }
     pub fn get_probability(&self, from : usize, to : usize) -> f64 {
         let a = self.values[from][to];
-        let  mut hour = time::now();
+        let mut hour = time::now();
         hour.tm_mday = 0;
         hour.tm_mon = 0;
         hour.tm_year = 0;
@@ -169,37 +173,64 @@ impl Markov {
 
         return self.number_of_chains as usize -1;
     }
-    pub fn apply_feedback(&mut self, feedback : bool) { //TODO: Vérifier le bon fonctionnement
+    pub fn apply_feedback(&mut self, feedback : bool) { //TODO: Vérifier le bon fonctionnement du décalage temporel.
         let lcn = self.last_checked_node;
         let pcn = self.previous_checked_node;
         let mut sensibility_to_apply = self.sensibility;
         let mut new_value = self.get_value(pcn, lcn);
         if !feedback {
             sensibility_to_apply *= -1f64;
+        }else{
+            let mut now = time::now();
+            now.tm_mday = 0;
+            now.tm_mon = 0;
+            now.tm_year = 0;
+            now.tm_yday = 0;
+            now.tm_utcoff = 0;
+            now.tm_nsec = 0;
+            let delta = now-self.hours[lcn];
+            //println!("{:?}", delta);
+            //println!("{:?}", self.hours[lcn] + delta);
+            if(now<self.hours[lcn]) {
+                self.hours[lcn] = self.hours[lcn] - delta/2;
+            } else {
+                self.hours[lcn] = self.hours[lcn] + delta/2;
+            }
+            self.hours[lcn].tm_mday = 0;
+            self.hours[lcn].tm_mon = 0;
+            self.hours[lcn].tm_year = 0;
+            self.hours[lcn].tm_yday = 0;
+            self.hours[lcn].tm_utcoff = 0;
+            self.hours[lcn].tm_nsec = 0;
         }
         self.set_value(pcn, lcn, new_value + sensibility_to_apply);
     }
+
 }
 
 #[test]
 fn it_works() {
-    let mut mTest = Markov::new(1, 0.1, 0);
-    mTest.printValues();
-    println!("{:?}", mTest.get_number_of_chains());
-    println!("ID du nouveau contenu {:?}", mTest.add_node());
-    //mTest.set_value(2, 1, 0.4);
-    //mTest.add_node();
-    //mTest.add_node();
-    //mTest.add_node();
-    //mTest.add_node();
-    println!("{:?}", mTest.get_number_of_chains());
-    //println!("{:?}", mTest.get_values().get(1).unwrap().len());
-    //mTest.printValues();
-    //println!("{:?}", mTest.sum(2));
-    //mTest.set_hour(0, time::strptime("2-14-12-26", "%w-%H-%M-%S").unwrap());
-    for i in 1..10 {
-        println!("{:?}", mTest.get_next_node());
-    }
+    let mut mTest = Markov::new(3, 0.1, 0);
+    mTest.set_debug_nodes();
+    println!("{:?}", mTest.get_probability(0, 1));
+    println!("{:?}", mTest.get_hour(1));
+    mTest.apply_feedback(true);
+    println!("{:?}", mTest.get_hour(1));
 
-    //println!("{:?}", mTest.get_probability(2, 3, Duration::minutes(90), time::strptime("1-14-47-26", "%w-%H-%M-%S").unwrap()));
+    mTest.apply_feedback(true);
+    println!("{:?}", mTest.get_hour(1));
+
+    mTest.apply_feedback(true);
+    println!("{:?}", mTest.get_hour(1));
+
+    mTest.apply_feedback(true);
+
+    println!("{:?}", mTest.get_hour(1));
+    mTest.apply_feedback(true);
+    println!("{:?}", mTest.get_hour(1));
+
+    mTest.apply_feedback(true);
+
+
+    println!("{:?}", mTest.get_hour(1));
 }
