@@ -13,3 +13,4 @@ crate-type = ["dylib"]
 rand = "0.3.0"
 time = "*"
 libc = "*"
+rustc-serialize = "0.3"
