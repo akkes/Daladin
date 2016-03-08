@@ -1,5 +1,5 @@
 extern crate libc;
-
+extern crate rustc_serialize;
 mod markov;
 
 use libc::uint32_t;

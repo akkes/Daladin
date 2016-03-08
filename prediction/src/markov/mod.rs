@@ -1,11 +1,15 @@
 extern crate rand;
 extern crate time;
-
+//use super::rustc_serialize::{json, Encodable};
+use std::collections::BTreeMap;
+use rustc_serialize::json::{self, ToJson, Json};
+//use rustc_serialize::{Encode, Decode};
 use self::time::Duration;
 use self::time::Tm;
 use self::rand::Rng;
 use std::cmp::PartialOrd;
 ///Represents a Markov chain.
+//#[derive(RustcDecodable, RustcEncodable)]
 pub struct Markov {
     number_of_chains: u32,
     sensibility: f64,
@@ -15,6 +19,7 @@ pub struct Markov {
     previous_checked_node : usize,
     last_checked_node : usize, //Is it useful ?
 }
+
 impl Markov {
     ///Creates a new Markov chain.
     /// # Arguments
@@ -117,6 +122,41 @@ impl Markov {
     pub fn get_hour(&self, id : usize) -> Tm {
         self.hours[id]
     }
+    pub fn get_hours_seconds(&self) -> Vec<Vec<i32>> {
+        let mut ret : Vec<Vec<i32>> = Vec::new();
+        let mut iter : Vec<i32> = Vec::new();
+        /*
+            To the person who will read this : I'm truly sorry about what will happen now.
+            This piece of code can't be relevant during any job interview I'll have.
+            It was hard times, and I had to react fast. That works, but the compiler should come and burn my house.
+
+            Again, Sorry.
+
+            - uj
+        */
+        for i in &self.hours {
+            iter.push(i.tm_sec);
+            iter.push(i.tm_min);
+            iter.push(i.tm_hour);
+            iter.push(i.tm_mday);
+            iter.push(i.tm_mon);
+            iter.push(i.tm_year);
+            iter.push(i.tm_wday);
+            iter.push(i.tm_yday);
+            iter.push(i.tm_isdst);
+            iter.push(i.tm_utcoff);
+            iter.push(i.tm_nsec);
+            ret.push(iter.clone());
+        }
+        return ret;
+    }
+    pub fn get_duration_seconds(&self) -> Vec<i64>{
+        let mut ret : Vec<i64> = Vec::new();
+        for i in &self.durations {
+            ret.push(i.num_seconds());
+        }
+        return ret;
+    }
     pub fn set_hour(&mut self, id : usize, hour : Tm) {
         self.hours[id] = hour
     }
@@ -205,32 +245,109 @@ impl Markov {
         }
         self.set_value(pcn, lcn, new_value + sensibility_to_apply);
     }
-
 }
 
+impl ToJson for Markov {
+    fn to_json(&self) -> Json {
+         let markov_ser = MarkovSer::new(&self);
+        // Json::Object(markov_ser);
+        let mut d = BTreeMap::new();
+        d.insert("number_of_chains".to_string(), markov_ser.number_of_chains.to_json());
+        d.insert("sensibility".to_string(), markov_ser.sensibility.to_json());
+        d.insert("values".to_string(), markov_ser.values.to_json());
+        d.insert("durations".to_string(), markov_ser.durations.to_json());
+        d.insert("hours".to_string(), markov_ser.hours.to_json());
+        d.insert("previous_checked_node".to_string(), self.previous_checked_node.to_json());
+        d.insert("last_checked_node".to_string(), self.last_checked_node.to_json());
+        return Json::Object(d);
+        //return json::encode(&markov_ser).unwrap();
+        //return Json::Object(markov_ser);
+    }
+}
+
+#[derive(RustcEncodable, RustcDecodable)]
+pub struct MarkovSer {
+   number_of_chains: u32,
+   sensibility: f64,
+   values: Vec<Vec<f64>>,
+   durations: Vec<i64>,
+   hours: Vec<Vec<i32>>,
+   previous_checked_node : usize,
+   last_checked_node : usize, //Is it useful ?
+}
+
+impl MarkovSer {
+    pub fn new(markov : &Markov) -> MarkovSer {
+        MarkovSer{
+            number_of_chains : markov.number_of_chains,
+            sensibility : markov.sensibility,
+            values : markov.values.clone(),
+            durations : markov.get_duration_seconds(),
+            hours : markov.get_hours_seconds(),
+            previous_checked_node : markov.previous_checked_node,
+            last_checked_node : markov.last_checked_node,
+        }
+    }
+    pub fn to_markov(&self) -> Markov{
+        let mut new_durations : Vec<Duration> = Vec::new();
+        let mut new_hours : Vec<Tm> = Vec::new();
+        for duration in &self.durations {
+            new_durations.push(Duration::seconds(*duration));
+        }
+        for hour in &self.hours {
+            new_hours.push(time::strptime("2-14-47-26", "%w-%H-%M-%S").unwrap());
+            //new_hours.push(time::at(time::Timespec{sec : *hour, nsec : 0}));
+        }
+        Markov {
+            number_of_chains : self.number_of_chains,
+            sensibility : self.sensibility,
+            values : self.values.clone(),
+            durations : new_durations,
+            hours : new_hours,
+            previous_checked_node : self.previous_checked_node,
+            last_checked_node : self.last_checked_node
+        }
+    }
+}
 #[test]
 fn it_works() {
-    let mut mTest = Markov::new(3, 0.05, 0);
-    mTest.set_debug_nodes();
-    println!("{:?}", mTest.get_probability(0, 1));
-    println!("{:?}", mTest.get_hour(1));
-    mTest.apply_feedback(true);
-    println!("{:?}", mTest.get_hour(1));
+     let mut mTest = Markov::new(3, 0.05, 0);
+     let encoded = mTest.to_json();
+     println!("{:?}" ,encoded);
+    //  println!("{:?}", mTest.get_hour(0));
+    //  let ser = MarkovSer::new(&mTest);
+    //  let encoded = json::encode(&ser).unwrap();
+    //  //let x: () = encoded;
+    //  let unser : MarkovSer = json::decode(&encoded).unwrap();
+    //  let mTest2 = unser.to_markov();
+    //  println!("{:?}", mTest2.get_hour(0));
+     //println!("{:?}", encoded);
+     //println!("{:?}", mTest.get_hour_seconds());
+     //println!("{:?}", mTest.get_duration_seconds());
+    // let encoded = json::encode(&mTest).unwrap();
+    // println!("{:?}", encoded);
+    // let decoded: Markov = json::decode(&encoded).unwrap();
 
-    mTest.apply_feedback(true);
-    println!("{:?}", mTest.get_hour(1));
-
-    mTest.apply_feedback(true);
-    println!("{:?}", mTest.get_hour(1));
-
-    mTest.apply_feedback(true);
-
-    println!("{:?}", mTest.get_hour(1));
-    mTest.apply_feedback(true);
-    println!("{:?}", mTest.get_hour(1));
-
-    mTest.apply_feedback(true);
-
-
-    println!("{:?}", mTest.get_hour(1));
+    // mTest.set_debug_nodes();
+    // println!("{:?}", mTest.get_probability(0, 1));
+    // println!("{:?}", mTest.get_hour(1));
+    // mTest.apply_feedback(true);
+    // println!("{:?}", mTest.get_hour(1));
+    //
+    // mTest.apply_feedback(true);
+    // println!("{:?}", mTest.get_hour(1));
+    //
+    // mTest.apply_feedback(true);
+    // println!("{:?}", mTest.get_hour(1));
+    //
+    // mTest.apply_feedback(true);
+    //
+    // println!("{:?}", mTest.get_hour(1));
+    // mTest.apply_feedback(true);
+    // println!("{:?}", mTest.get_hour(1));
+    //
+    // mTest.apply_feedback(true);
+    //
+    //
+    // println!("{:?}", mTest.get_hour(1));
 }
