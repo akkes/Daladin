@@ -39,24 +39,24 @@ class Register:
         return lib.register_get_next_content(self.obj, markov_id)
     def apply_feedback(self, markov_id, feedback):
         return lib.register_apply_feedback(self.obj, markov_id, feedback)
-
-with Register() as register:
-    sample_radio = register.add_radio()
-    genre_list = ["undefined", "techno", "disco", "rock"]
-    register.add_content(0) #ID:1 techno
-    register.add_content(0) #ID:2 disco
-    register.add_content(0) #ID:3 rock
-    for i in range(1, 20):
-        a = genre_list[register.get_next_content(0)]
-        print(a)
-        if a == "techno":
-            print("applying feedback")
-            register.apply_feedback(0, 1)
-    register.add_content(0)
-    genre_list.append("house")
-    for i in range(1, 20):
-        a = genre_list[register.get_next_content(0)]
-        print(a)
-        if a == "house":
-            print("applying feedback")
-            register.apply_feedback(0, 1)
+# 
+# with Register() as register:
+#     sample_radio = register.add_radio()
+#     genre_list = ["undefined", "techno", "disco", "rock"]
+#     register.add_content(0) #ID:1 techno
+#     register.add_content(0) #ID:2 disco
+#     register.add_content(0) #ID:3 rock
+#     for i in range(1, 20):
+#         a = genre_list[register.get_next_content(0)]
+#         print(a)
+#         if a == "techno":
+#             print("applying feedback")
+#             register.apply_feedback(0, 1)
+#     register.add_content(0)
+#     genre_list.append("house")
+#     for i in range(1, 20):
+#         a = genre_list[register.get_next_content(0)]
+#         print(a)
+#         if a == "house":
+#             print("applying feedback")
+#             register.apply_feedback(0, 1)
