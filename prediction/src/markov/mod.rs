@@ -4,6 +4,7 @@ extern crate time;
 use std::collections::BTreeMap;
 use rustc_serialize::json::{self, ToJson, Json};
 //use rustc_serialize::{Encode, Decode};
+use std::thread;
 use self::time::Duration;
 use self::time::Tm;
 use self::rand::Rng;
@@ -27,12 +28,20 @@ impl Markov {
     /// * `number_of_chains` - Number of chains the Markov chain will have. Each chain can be a podcast ID.
     /// * `sensibility` - This will afflict how much the probability values will evolve depending on the user feedback.
     pub fn new(number_of_chains: u32, sensibility: f64, starting_node : usize) -> Markov {
+        let mut hour = time::now(); //oh, you!
+        hour.tm_mday = 0;
+        hour.tm_mon = 0;
+        hour.tm_year = 0;
+        hour.tm_yday = 0;
+        hour.tm_utcoff = 0;
+        hour.tm_nsec = 0;
         Markov {
             number_of_chains : number_of_chains,
             sensibility : sensibility,
             values : Markov::init_values(number_of_chains, starting_node),
             durations : vec![Duration::minutes(60);number_of_chains as usize],
-            hours : vec![time::strptime("2-14-47-26", "%w-%H-%M-%S").unwrap();number_of_chains as usize],
+            //hours : vec![time::strptime("2-14-47-26", "%w-%H-%M-%S").unwrap();number_of_chains as usize],
+            hours : vec![hour; number_of_chains as usize],
             previous_checked_node : 0,
             last_checked_node : starting_node, /*It is.*/
         }
@@ -101,6 +110,18 @@ impl Markov {
             } else {
                 self.values[from][i] += delta/(self.number_of_chains-1) as f64;
             }
+            if self.values[from][to] > 1f64 {
+                self.values[from][to] = 1f64;
+            }
+            if self.values[from][to] < 0f64 {
+                self.values[from][to] = 0f64;
+            }
+            if self.values[from][i] > 1f64 {
+                self.values[from][i] = 1f64;
+            }
+            if self.values[from][i] < 0f64 {
+                self.values[from][i] = 0f64;
+            }
         }
     }
     pub fn get_probability(&self, from : usize, to : usize) -> f64 {
@@ -112,11 +133,10 @@ impl Markov {
         hour.tm_yday = 0;
         hour.tm_utcoff = 0;
         hour.tm_nsec = 0;
-        //println!("{:?}", normal_hour);
         //println!("{:?}", hour);
         let top_exp = -((self.hours[to]-hour).num_seconds() as f64).powi(2);
         let bot_exp = 2f64 * (self.durations[to].num_seconds() as f64/4f64).powi(2);
-        let egblog = a*(top_exp/bot_exp).exp();
+        let egblog = a*((top_exp/bot_exp).exp());
         return egblog;
     }
     pub fn get_hour(&self, id : usize) -> Tm {
@@ -174,6 +194,7 @@ impl Markov {
         //println!("{:?}", gaussian_probs);
         let sum_probs = gaussian_probs.iter().fold(0f64, |sum, val| sum + val) as f64;
         //println!("{:?}", sum_probs); //TODO: Vérifier si c'est toujours ~1
+
         let mut random = rand::thread_rng().gen_range(0f64, sum_probs);
         for i in 0..self.number_of_chains {
             //println!("Random : {:?} and values : {:?}", random, self.values[self.last_checked_node][i]);
@@ -232,9 +253,9 @@ impl Markov {
             //println!("{:?}", delta);
             //println!("{:?}", self.hours[lcn] + delta);
             if now<self.hours[lcn]  {
-                self.hours[lcn] = self.hours[lcn] - delta/2;
+                self.hours[lcn] = self.hours[lcn] - delta/4;
             } else {
-                self.hours[lcn] = self.hours[lcn] + delta/2;
+                self.hours[lcn] = self.hours[lcn] + delta/4;
             }
             self.hours[lcn].tm_mday = 0;
             self.hours[lcn].tm_mon = 0;
@@ -309,11 +330,32 @@ impl MarkovSer {
         }
     }
 }
+
 #[test]
+fn demo() {
+    //On crée une nouvelle chaîne.
+    let mut radio = Markov::new(2, 0.1, 0);
+    println!("Valeurs de probabilite : {:?}", radio.get_values());
+    println!("Heure actuelle : {:?}", time::strftime("%A, %H-%M-%S", &time::now()).unwrap());
+    println!("Heure optimale du contenu 1 : {:?}", time::strftime("%A, %H-%M-%S", &radio.get_hour(0)).unwrap());
+    println!("Heure optimale du contenu 2 : {:?}", time::strftime("%A, %H-%M-%S", &radio.get_hour(1)).unwrap());
+    thread::sleep_ms(10000);
+    println!("On demande 10 contenus. Si c'est le contenu 2 qui sort, on applique un feedback positif.");
+    for i in 1..10 {
+        if radio.get_next_node() == 1 {
+            radio.apply_feedback(true);
+        }
+    }
+    println!("Valeurs de probabilite : {:?}", radio.get_values());
+    println!("Heure actuelle : {:?}", time::strftime("%A, %H-%M-%S", &time::now()).unwrap());
+    println!("Heure optimale du contenu 1 : {:?}", time::strftime("%A, %H-%M-%S", &radio.get_hour(0)).unwrap());
+    println!("Heure optimale du contenu 2 : {:?}", time::strftime("%A, %H-%M-%S", &radio.get_hour(1)).unwrap());
+}
+/*#[test]
 fn it_works() {
-     let mut mTest = Markov::new(3, 0.05, 0);
-     let encoded = mTest.to_json();
-     println!("{:?}" ,encoded);
+     //let mut mTest = Markov::new(3, 0.05, 0);
+     //let encoded = mTest.to_json();
+     //println!("{:?}" ,encoded);
     //  println!("{:?}", mTest.get_hour(0));
     //  let ser = MarkovSer::new(&mTest);
     //  let encoded = json::encode(&ser).unwrap();
@@ -350,4 +392,4 @@ fn it_works() {
     //
     //
     // println!("{:?}", mTest.get_hour(1));
-}
+}*/
