@@ -254,8 +254,10 @@ impl Markov {
             //println!("{:?}", self.hours[lcn] + delta);
             if now<self.hours[lcn]  {
                 self.hours[lcn] = self.hours[lcn] - delta/4;
+                self.hours[lcn].tm_wday = 3;
             } else {
                 self.hours[lcn] = self.hours[lcn] + delta/4;
+                self.hours[lcn].tm_wday = 3;
             }
             self.hours[lcn].tm_mday = 0;
             self.hours[lcn].tm_mon = 0;
