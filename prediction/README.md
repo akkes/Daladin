@@ -1,8 +1,6 @@
-Prediction
+Prediction(Djinn)
 ==========
 
-Implémentation Rust des chaînes de markov utilisées dans le projet Daladin.
+Intelligence of the Daladin project.
 
-# TODO
-
-* LabeledMarkov, avec des string ou des ID par node dans la chaîne. 
+run `cargo doc` to generate the documentation of the module.

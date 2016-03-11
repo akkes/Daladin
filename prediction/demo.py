@@ -10,8 +10,8 @@ with Register() as register:
     #Nous avons ici la liste des genres répertoriés par la radio. undefined correspond au noeud de départ.
     genre_list = ["house", "techno"]
     #On ajoute nos genres dans le radio créée
+    id_house = 0
     id_techno = register.add_content(sample_radio) #ID:1 techno
-    #id_house = register.add_content(sample_radio) #ID:2 disco
     print "Demandons 20 morceaux."
     for i in range(1, 20):
         a = genre_list[register.get_next_content(0)]
